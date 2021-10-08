@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.SlashCommands;
 using MeiyounaiseSlash.Commands;
+using MeiyounaiseSlash.Commands.Last;
+using MeiyounaiseSlash.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
@@ -26,7 +28,12 @@ namespace MeiyounaiseSlash.Core
                 Environment.Exit(1);
             }
 
-            var services = new ServiceCollection().BuildServiceProvider();
+            var services = new ServiceCollection()
+                .AddSingleton(new BoardDatabase("BoardDatabase.db"))
+                .AddSingleton(new GuildDatabase("GuildDatabase.db"))
+                .AddSingleton(new LastDatabase("LastDatabase.db"))
+                .AddSingleton(new UserDatabase("UserDatabase.db"))
+                .BuildServiceProvider();
             
             Client = new DiscordClient(new DiscordConfiguration
             {
@@ -47,6 +54,7 @@ namespace MeiyounaiseSlash.Core
             };
             
             SlashCommands.RegisterCommands<MiscCommands>(328353999508209678);
+            SlashCommands.RegisterCommands<Account>(328353999508209678);
             
         }
 

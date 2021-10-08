@@ -6,7 +6,7 @@ namespace MeiyounaiseSlash.Data
     {
         #region POCOs
 
-        public class User
+        private class User
         {
             public ulong Id { get; init; }
             public string LastFm { get; set; }
@@ -14,11 +14,18 @@ namespace MeiyounaiseSlash.Data
 
         #endregion
 
-        private ILiteCollection<User> _userCollection; 
-        
-        public UserDatabase(string path) : base(path)
-        {
-            _userCollection = Database.GetCollection<User>("users");
-        }
+        private readonly ILiteCollection<User> _userCollection;
+
+        public UserDatabase(string path) : base(path) => _userCollection = Database.GetCollection<User>("users");
+
+        public string GetLastAccount(ulong user)
+            => _userCollection.Query().Where(x => x.Id == user).FirstOrDefault()?.LastFm;
+
+        public void SetLastAccount(ulong id, string last)
+            => _userCollection.Upsert(new User
+            {
+                Id = id,
+                LastFm = last
+            });
     }
 }
