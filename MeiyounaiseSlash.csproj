@@ -7,17 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="App.Metrics" Version="4.3.0-preview.0.30" />
       <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01024" />
       <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01024" />
       <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01024" />
       <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01024" />
       <PackageReference Include="Inflatable.Lastfm" Version="1.2.0" />
       <PackageReference Include="LiteDB" Version="5.0.11" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Services" />
+      <PackageReference Include="prometheus-net" Version="5.0.1" />
     </ItemGroup>
 
 </Project>

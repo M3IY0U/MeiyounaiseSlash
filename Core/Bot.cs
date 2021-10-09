@@ -2,12 +2,16 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using MeiyounaiseSlash.Commands;
 using MeiyounaiseSlash.Commands.Last;
 using MeiyounaiseSlash.Data;
+using MeiyounaiseSlash.Exceptions;
+using MeiyounaiseSlash.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using Prometheus;
 
 namespace MeiyounaiseSlash.Core
 {
@@ -28,6 +32,10 @@ namespace MeiyounaiseSlash.Core
                 Environment.Exit(1);
             }
 
+            Constants.ErrorLogChannel = _config?.ErrorLogChannel;
+            var prometheus = new MetricServer("localhost", 1234);
+            prometheus.Start();
+            
             var services = new ServiceCollection()
                 .AddSingleton(new BoardDatabase("BoardDatabase.db"))
                 .AddSingleton(new GuildDatabase("GuildDatabase.db"))
@@ -41,20 +49,18 @@ namespace MeiyounaiseSlash.Core
                 Token = _config?.Token
             });
 
+            Client.UseInteractivity();
+            
             SlashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration
             {
                 Services = services
             });
 
-            SlashCommands.SlashCommandErrored += (sender, args) =>
-            {
-                args.Context.Channel.SendMessageAsync(
-                    $"Error: `{args.Exception.Message}`\n```{args.Exception.StackTrace}```");
-                return Task.CompletedTask;
-            };
+            SlashCommands.SlashCommandErrored += ExceptionHandler.SlashCommandErrored;
             
             SlashCommands.RegisterCommands<MiscCommands>(328353999508209678);
             SlashCommands.RegisterCommands<Account>(328353999508209678);
+            SlashCommands.RegisterCommands<BoardCommands>(328353999508209678);
             
         }
 

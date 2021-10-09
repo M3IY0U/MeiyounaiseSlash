@@ -7,6 +7,6 @@ namespace MeiyounaiseSlash.Utilities
         public static readonly DiscordEmoji CheckEmoji = DiscordEmoji.FromUnicode("✅");
         public static readonly DiscordEmoji InfoEmoji = DiscordEmoji.FromUnicode("ℹ");
         public static readonly DiscordEmoji ErrorEmoji = DiscordEmoji.FromUnicode("❎");
-        
+        public static ulong? ErrorLogChannel { get; set; }
     }
 }

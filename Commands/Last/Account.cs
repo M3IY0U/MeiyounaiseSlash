@@ -15,33 +15,24 @@ namespace MeiyounaiseSlash.Commands.Last
         public async Task SetLast(InteractionContext ctx,
             [Option("lastfm", "Your last.fm account name", true)] string last = "")
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
-            
-            var response = new DiscordWebhookBuilder();
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
+            string content;
             if (string.IsNullOrEmpty(last))
             {
                 last = UserDatabase.GetLastAccount(ctx.User.Id);
-                if (string.IsNullOrEmpty(last))
-                {
-                    await ctx.EditResponseAsync(
-                        response.AddEmbed(new DiscordEmbedBuilder()
-                            .WithDescription($"{Constants.ErrorEmoji} You have not set your last.fm account yet.")));
-                }
-                else
-                {
-                    await ctx.EditResponseAsync(
-                        response.AddEmbed(new DiscordEmbedBuilder()
-                            .WithDescription($"{Constants.InfoEmoji} Your last.fm account is currently set to: `{last}`")));
-                }
+                content = string.IsNullOrEmpty(last)
+                    ? $"{Constants.ErrorEmoji} You have not set your last.fm account yet."
+                    : $"{Constants.InfoEmoji} Your last.fm account is currently set to: `{last}`";
             }
             else
             {
                 UserDatabase.SetLastAccount(ctx.User.Id, last);
-                await ctx.EditResponseAsync(
-                    response.AddEmbed(new DiscordEmbedBuilder()
-                        .WithDescription($"{Constants.CheckEmoji} Your last.fm account has been set to: `{last}`")));
+                content = $"{Constants.CheckEmoji} Your last.fm account has been set to: `{last}`";
             }
+
+            await ctx.EditResponseAsync(Util.EmbedReply(content));
         }
     }
 }

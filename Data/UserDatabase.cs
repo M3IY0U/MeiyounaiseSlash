@@ -19,7 +19,7 @@ namespace MeiyounaiseSlash.Data
         public UserDatabase(string path) : base(path) => _userCollection = Database.GetCollection<User>("users");
 
         public string GetLastAccount(ulong user)
-            => _userCollection.Query().Where(x => x.Id == user).FirstOrDefault()?.LastFm;
+            => _userCollection.FindOne(x => x.Id == user)?.LastFm;
 
         public void SetLastAccount(ulong id, string last)
             => _userCollection.Upsert(new User
