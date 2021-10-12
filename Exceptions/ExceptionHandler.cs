@@ -17,13 +17,18 @@ namespace MeiyounaiseSlash.Exceptions
                 case CommandException:
                     content = $"❌ {args.Exception.Message}";
                     break;
+
+                case InteractionTimeoutException:
+                    content = $"💤 {args.Exception.Message}";
+                    break;
                 default:
                     content = "❌ Internal Exception";
 
                     if (Constants.ErrorLogChannel.HasValue)
                     {
                         var channel = await args.Context.Client.GetChannelAsync(Constants.ErrorLogChannel.Value);
-                        await channel.SendMessageAsync($"**Message:** {args.Exception.Message}",
+                        await channel.SendMessageAsync(
+                            $"\\<{args.Exception.GetType().Name}\\> **Message:** {args.Exception.Message}",
                             new DiscordEmbedBuilder()
                                 .WithTitle($"Command \"{args.Context.CommandName}\" errored")
                                 .WithDescription(
@@ -33,7 +38,10 @@ namespace MeiyounaiseSlash.Exceptions
                     break;
             }
 
-            await args.Context.Interaction.EditOriginalResponseAsync(Util.EmbedReply(content));
+            await args.Context.Interaction.CreateFollowupMessageAsync(
+                new DiscordFollowupMessageBuilder()
+                    .AddEmbed(new DiscordEmbedBuilder()
+                        .WithDescription(content)));
             Statistics.CommandExceptionCounter.Inc();
         }
     }

@@ -22,68 +22,65 @@ namespace MeiyounaiseSlash.Commands
         public async Task CreateBoardCommand(InteractionContext ctx,
             [Option("channel", "The new board channel")]
             DiscordChannel channel,
-            [Option("amount", "Amount of reactions needed to post a message in the board")]
-            long amount)
+            [Option("threshold", "Amount of reactions needed to post a message in the board")]
+            long threshold)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
             if (channel.Type != ChannelType.Text)
                 throw new CommandException("Only text channels can be boards.");
 
-            BoardDatabase.AddBoard(ctx.Guild.Id, channel.Id, amount);
-
-            await ctx.EditResponseAsync(Util.EmbedReply(
-                $"{Constants.CheckEmoji} Board in channel {channel.Mention} with {amount} reactions has been created."));
+            if (BoardDatabase.UpsertBoard(ctx.Guild.Id, channel.Id, threshold))
+            {
+                await ctx.EditResponseAsync(Util.EmbedReply(
+                    $"{Constants.CheckEmoji} Board in channel {channel.Mention} with {threshold} reactions has been created."));    
+            }
+            else
+            {
+                await ctx.EditResponseAsync(Util.EmbedReply(
+                    $"{Constants.CheckEmoji} The board in this server was updated to: {channel.Mention} with {threshold} reactions."));    
+            }
         }
 
         [SlashCommand("delete", "Delete a board.")]
         public async Task DeleteBoardCommand(InteractionContext ctx)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            var boards = BoardDatabase.GetBoardsInGuild(ctx.Guild.Id)
-                .Select(board => (board, name: ctx.Guild.GetChannel(board.Channel).Name)).ToList();
+            if (!BoardDatabase.TryGetBoard(b => b.GuildId == ctx.Guild.Id, out var board))
+                throw new CommandException("There is no active board in this server.");
 
-            if (!boards.Any())
+            var buttons = new[]
             {
+                new DiscordButtonComponent(ButtonStyle.Danger, "delete_board_yes", "Yes"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, "delete_board_no", "No")
+            };
+
+            var msg = await ctx.EditResponseAsync(Util.EmbedReply(
+                    $"{Constants.InfoEmoji} Do you *really* want to delete the board in <#{board.ChannelId}>?")
+                // ReSharper disable once CoVariantArrayConversion
+                .AddComponents(buttons));
+            
+            var ir = await ctx.Client.GetInteractivity()
+                .WaitForButtonAsync(msg, buttons);
+
+            if (ir.TimedOut) throw new InteractionTimeoutException("Timed out.");
+
+            if (ir.Result.Id == "delete_board_yes")
+            {
+                BoardDatabase.DeleteBoard(ctx.Guild.Id, board.ChannelId);
                 await ctx.EditResponseAsync(
-                    Util.EmbedReply($"{Constants.ErrorEmoji} No active boards in this server."));
-                return;
+                    Util.EmbedReply($"{Constants.CheckEmoji} The board in <#{board.ChannelId}> was deleted."));
             }
-
-            var options = boards.Select(tuple =>
-                new DiscordSelectComponentOption($"#{tuple.name} ({tuple.board.AmountNeeded} reactions)",
-                    $"{tuple.board.Channel}"));
-
-            var m = await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                .WithContent("Select the board you want to delete:")
-                .AddComponents(new DiscordSelectComponent("board_delete", "Example Board", options)));
-
-            var result = await ctx.Client.GetInteractivity().WaitForSelectAsync(m, ctx.User, "board_delete");
-
-            BoardDatabase.DeleteBoard(ctx.Guild.Id, Convert.ToUInt64(result.Result.Values[0]));
-
-            await ctx.EditResponseAsync(
-                Util.EmbedReply($"{Constants.CheckEmoji} The board in <#{result.Result.Values[0]}> was deleted."));
+            else
+            {
+                await ctx.EditResponseAsync(Util.EmbedReply($"{Constants.InfoEmoji} Aborted."));
+            }
         }
-
-        [SlashCommand("list", "List board(s) in this server.")]
-        public async Task ListBoardsCommand(InteractionContext ctx)
-        {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-            var boards = BoardDatabase.GetBoardsInGuild(ctx.Guild.Id).Select(x =>
-                $"» <#{x.Channel}> with {x.AmountNeeded} reactions\n\tBlacklisted channels: " +
-                $"{string.Join(", ", x.BlacklistedChannels.Select(c => $"<#{c}>"))}");
-            var content = string.Join("\n", boards);
-            await ctx.EditResponseAsync(
-                Util.EmbedReply($"{Constants.InfoEmoji} Board(s) in {ctx.Guild.Name}:\n{content}"));
-        }
-
+        
         [SlashCommand("blacklist", "Adds a channel to the blacklist of the board.")]
         public async Task BlackList(InteractionContext ctx,
             [Option("action", "Action to take.")] BlacklistAction action,
-            [Option("boardchannel", "The board channel.")]
-            DiscordChannel boardChannel,
             [Option("channel", "Target channel.")] DiscordChannel channel = null)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
@@ -91,34 +88,33 @@ namespace MeiyounaiseSlash.Commands
             switch (action)
             {
                 case BlacklistAction.Add:
-                    if (channel?.Type is not ChannelType.Text)
+                    if (channel?.Type is not ChannelType.Text && channel?.Type is not ChannelType.PublicThread)
                         throw new CommandException("Invalid channel provided.");
-                    if (!BoardDatabase.TryGetBoard(b => b.GuildId == ctx.Guild.Id && b.Channel == boardChannel.Id,
+                    if (!BoardDatabase.TryGetBoard(b => b.GuildId == ctx.Guild.Id,
                         out _))
                         throw new CommandException("There currently is no board in the provided channel.");
 
-                    BoardDatabase.AddToBlackList(ctx.Guild.Id, boardChannel.Id, channel.Id);
+                    BoardDatabase.AddToBlackList(ctx.Guild.Id, channel.Id);
                     await ctx.EditResponseAsync(Util.EmbedReply(
-                        $"{Constants.CheckEmoji} Channel {channel.Mention} has been added to the blacklist for board {boardChannel.Mention}."));
+                        $"{Constants.CheckEmoji} Channel {channel.Mention} has been added to the blacklist."));
 
                     break;
                 case BlacklistAction.Remove:
                     if (channel is null)
                         throw new CommandException("You need to provide a channel to remove.");
-                    if (!BoardDatabase.TryGetBoard(b => b.GuildId == ctx.Guild.Id && b.Channel == boardChannel.Id,
+                    if (!BoardDatabase.TryGetBoard(b => b.GuildId == ctx.Guild.Id,
                         out var board))
                         throw new CommandException("There currently is no board in the provided channel.");
                     if (!board.BlacklistedChannels.Contains(channel.Id))
                         throw new CommandException("The board doesn't have that channel blacklisted.");
 
-                    BoardDatabase.RemoveFromBlacklist(ctx.Guild.Id, boardChannel.Id, channel.Id);
+                    BoardDatabase.RemoveFromBlacklist(ctx.Guild.Id, channel.Id);
                     await ctx.EditResponseAsync(Util.EmbedReply(
-                        $"{Constants.CheckEmoji} Channel {channel.Mention} has been removed from the blacklist for board {boardChannel.Mention}."));
+                        $"{Constants.CheckEmoji} Channel {channel.Mention} has been removed from the blacklist."));
 
                     break;
                 case BlacklistAction.Clear:
-                    if (!BoardDatabase.TryGetBoard(b => b.GuildId == ctx.Guild.Id && b.Channel == boardChannel.Id,
-                        out _))
+                    if (!BoardDatabase.TryGetBoard(b => b.GuildId == ctx.Guild.Id, out _))
                         throw new CommandException("There currently is no board in the provided channel.");
 
                     var buttons = new[]
@@ -128,16 +124,18 @@ namespace MeiyounaiseSlash.Commands
                     };
 
                     var m = await ctx.EditResponseAsync(Util.EmbedReply(
-                            $"{Constants.InfoEmoji} Do you *really* want to clear all blacklisted channels for board {boardChannel.Mention}?")
+                            $"{Constants.InfoEmoji} Do you *really* want to clear all blacklisted channels?")
                         // ReSharper disable once CoVariantArrayConversion
                         .AddComponents(buttons));
 
                     var x = await ctx.Client.GetInteractivity()
                         .WaitForButtonAsync(m, buttons);
+                    
+                    if (x.TimedOut) throw new InteractionTimeoutException("Timed out.");
 
                     if (x.Result.Id == "confirm_blacklist_clear")
                     {
-                        BoardDatabase.ClearBlacklist(ctx.Guild.Id, boardChannel.Id);
+                        BoardDatabase.ClearBlacklist(ctx.Guild.Id);
                         await ctx.EditResponseAsync(
                             Util.EmbedReply($"{Constants.CheckEmoji} Blacklist has been cleared."));
                     }
@@ -148,11 +146,11 @@ namespace MeiyounaiseSlash.Commands
 
                     break;
                 case BlacklistAction.List:
-                    if (!BoardDatabase.TryGetBoard(b => b.GuildId == ctx.Guild.Id && b.Channel == boardChannel.Id,
+                    if (!BoardDatabase.TryGetBoard(b => b.GuildId == ctx.Guild.Id,
                         out board))
                         throw new CommandException("There currently is no board in the provided channel.");
 
-                    await ctx.EditResponseAsync(Util.EmbedReply($"{Constants.InfoEmoji} Blacklisted channels for {boardChannel.Mention}\n" +
+                    await ctx.EditResponseAsync(Util.EmbedReply($"{Constants.InfoEmoji} Blacklisted channels:\n" +
                                                                 string.Join("\n",
                                                                     board.BlacklistedChannels.Select(b => $"» <#{b}>"))));
 

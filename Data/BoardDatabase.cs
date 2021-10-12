@@ -13,8 +13,8 @@ namespace MeiyounaiseSlash.Data
         {
             public int Id { get; set; }
             public ulong GuildId { get; set; }
-            public ulong Channel { get; set; }
-            public long AmountNeeded { get; set; }
+            public ulong ChannelId { get; set; }
+            public long Threshold { get; set; }
             public List<ulong> BlacklistedChannels { get; set; }
         }
 
@@ -28,12 +28,12 @@ namespace MeiyounaiseSlash.Data
         #endregion
 
         private ILiteCollection<Board> _boardCollection;
-        private ILiteCollection<Message> _messageCollection;
+        public ILiteCollection<Message> MessageCollection;
 
         public BoardDatabase(string path) : base(path)
         {
             _boardCollection = Database.GetCollection<Board>("boards");
-            _messageCollection = Database.GetCollection<Message>("messages");
+            MessageCollection = Database.GetCollection<Message>("messages");
         }
 
         public bool TryGetBoard(Expression<Func<Board, bool>> predicate, out Board board)
@@ -41,39 +41,47 @@ namespace MeiyounaiseSlash.Data
             board = _boardCollection.FindOne(predicate);
             return board is not null;
         }
-    
-        public void AddBoard(ulong guildId, ulong channel, long amount)
-            => _boardCollection.Insert(new Board
-            {
-                Channel = channel,
-                GuildId = guildId,
-                AmountNeeded = amount,
-                BlacklistedChannels = new List<ulong>()
-            });
 
-        public List<Board> GetBoardsInGuild(ulong guildId)
-            => _boardCollection.Query().Where(board => board.GuildId == guildId).ToList();
+        public bool UpsertBoard(ulong guildId, ulong channel, long amount)
+        {
+            if (!TryGetBoard(b => b.GuildId == guildId, out var board))
+            {
+                _boardCollection.Insert(new Board
+                {
+                    ChannelId = channel,
+                    GuildId = guildId,
+                    Threshold = amount,
+                    BlacklistedChannels = new List<ulong>()
+                });
+                return true;
+            }
+
+            board.ChannelId = channel;
+            board.Threshold = amount;
+            _boardCollection.Update(board);
+            return false;
+        }
 
         public void DeleteBoard(ulong guildId, ulong channelId)
-            => _boardCollection.DeleteMany(board => board.GuildId == guildId && board.Channel == channelId);
+            => _boardCollection.DeleteMany(board => board.GuildId == guildId && board.ChannelId == channelId);
 
-        public void AddToBlackList(ulong guildId, ulong channelId, ulong channelToAdd)
+        public void AddToBlackList(ulong guildId, ulong channelToAdd)
         {
-            var toUpdate = _boardCollection.FindOne(board => board.GuildId == guildId && board.Channel == channelId);
+            var toUpdate = _boardCollection.FindOne(board => board.GuildId == guildId);
             toUpdate.BlacklistedChannels.Add(channelToAdd);
             _boardCollection.Update(toUpdate);
         }
 
-        public void RemoveFromBlacklist(ulong guildId, ulong channelId, ulong channelToRemove)
+        public void RemoveFromBlacklist(ulong guildId, ulong channelToRemove)
         {
-            var toUpdate = _boardCollection.FindOne(board => board.GuildId == guildId && board.Channel == channelId);
+            var toUpdate = _boardCollection.FindOne(board => board.GuildId == guildId);
             toUpdate.BlacklistedChannels.Remove(channelToRemove);
             _boardCollection.Update(toUpdate);
         }
 
-        public void ClearBlacklist(ulong guildId, ulong channelId)
+        public void ClearBlacklist(ulong guildId)
         {
-            var toUpdate = _boardCollection.FindOne(board => board.GuildId == guildId && board.Channel == channelId);
+            var toUpdate = _boardCollection.FindOne(board => board.GuildId == guildId);
             toUpdate.BlacklistedChannels.Clear();
             _boardCollection.Update(toUpdate);
         }

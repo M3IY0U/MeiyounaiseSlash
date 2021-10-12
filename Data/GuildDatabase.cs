@@ -14,7 +14,6 @@ namespace MeiyounaiseSlash.Data
             public ulong JoinChannel { get; set; }
             public ulong LeaveChannel { get; set; }
             public int PreviousMessages { get; set; }
-            public string BoardId { get; set; }
         }
 
         #endregion

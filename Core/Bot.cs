@@ -2,12 +2,14 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using MeiyounaiseSlash.Commands;
 using MeiyounaiseSlash.Commands.Last;
 using MeiyounaiseSlash.Data;
 using MeiyounaiseSlash.Exceptions;
+using MeiyounaiseSlash.Services;
 using MeiyounaiseSlash.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -35,13 +37,15 @@ namespace MeiyounaiseSlash.Core
             Constants.ErrorLogChannel = _config?.ErrorLogChannel;
             var prometheus = new MetricServer("localhost", 1234);
             prometheus.Start();
-            
+
             var services = new ServiceCollection()
                 .AddSingleton(new BoardDatabase("BoardDatabase.db"))
                 .AddSingleton(new GuildDatabase("GuildDatabase.db"))
                 .AddSingleton(new LastDatabase("LastDatabase.db"))
                 .AddSingleton(new UserDatabase("UserDatabase.db"))
                 .BuildServiceProvider();
+
+            var boardService = new BoardService(services.GetService(typeof(BoardDatabase)) as BoardDatabase);
             
             Client = new DiscordClient(new DiscordConfiguration
             {
@@ -49,19 +53,29 @@ namespace MeiyounaiseSlash.Core
                 Token = _config?.Token
             });
 
-            Client.UseInteractivity();
+            Client.UseInteractivity(new InteractivityConfiguration
+            {
+                Timeout = TimeSpan.FromSeconds(10)
+            });
             
             SlashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration
             {
                 Services = services
             });
 
-            SlashCommands.SlashCommandErrored += ExceptionHandler.SlashCommandErrored;
+            RegisterHandlers(boardService);
             
             SlashCommands.RegisterCommands<MiscCommands>(328353999508209678);
             SlashCommands.RegisterCommands<Account>(328353999508209678);
             SlashCommands.RegisterCommands<BoardCommands>(328353999508209678);
             
+        }
+
+        private void RegisterHandlers(BoardService boardService)
+        {
+            Client.MessageReactionAdded += boardService.ReactionAdded;
+            Client.MessageReactionRemoved += boardService.ReactionRemoved;
+            SlashCommands.SlashCommandErrored += ExceptionHandler.SlashCommandErrored;
         }
 
         public void Dispose()
