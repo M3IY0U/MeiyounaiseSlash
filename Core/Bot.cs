@@ -19,7 +19,7 @@ namespace MeiyounaiseSlash.Core
 {
     public class Bot : IDisposable
     {
-        public DiscordClient Client { get; set; }
+        public DiscordClient Client { get; }
         public SlashCommandsExtension SlashCommands { get; set; }
         private readonly Config _config;
 
@@ -46,7 +46,7 @@ namespace MeiyounaiseSlash.Core
                 .BuildServiceProvider();
 
             var boardService = new BoardService(services.GetService(typeof(BoardDatabase)) as BoardDatabase);
-            
+
             Client = new DiscordClient(new DiscordConfiguration
             {
                 Intents = DiscordIntents.All,
@@ -57,18 +57,17 @@ namespace MeiyounaiseSlash.Core
             {
                 Timeout = TimeSpan.FromSeconds(10)
             });
-            
+
             SlashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration
             {
                 Services = services
             });
 
             RegisterHandlers(boardService);
-            
+
             SlashCommands.RegisterCommands<MiscCommands>(328353999508209678);
             SlashCommands.RegisterCommands<Account>(328353999508209678);
             SlashCommands.RegisterCommands<BoardCommands>(328353999508209678);
-            
         }
 
         private void RegisterHandlers(BoardService boardService)
@@ -84,7 +83,7 @@ namespace MeiyounaiseSlash.Core
             SlashCommands = null;
             GC.SuppressFinalize(this);
         }
-        
+
         public async Task RunAsync()
         {
             await Client.ConnectAsync();

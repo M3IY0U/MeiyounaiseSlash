@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.EventArgs;
@@ -21,6 +22,15 @@ namespace MeiyounaiseSlash.Exceptions
                 case InteractionTimeoutException:
                     content = $"💤 {args.Exception.Message}";
                     break;
+                case SlashExecutionChecksFailedException:
+                    try
+                    {
+                        await args.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                            new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder()
+                                .WithDescription("🚫 You don't have permission to use that command.")));
+                    }
+                    catch (Exception) { /* ignored */ }
+                    return;
                 default:
                     content = "❌ Internal Exception";
 
