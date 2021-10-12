@@ -51,7 +51,7 @@ namespace MeiyounaiseSlash.Services
                 PostMessageToBoard(sourceMsg, board, FormatReactions(sourceMsg, board.Threshold));
             }
         }
-        
+
         public async Task ReactionRemoved(DiscordClient sender, MessageReactionRemoveEventArgs args)
         {
             if (args.User.IsBot) return;
@@ -82,14 +82,14 @@ namespace MeiyounaiseSlash.Services
 
         private static string FormatReactions(DiscordMessage msg, long threshold)
             => string.Join(" \n ",
-                (from reaction in msg.Reactions
-                    where reaction.Count >= threshold
-                    select (reaction, reaction.Count))
-                .OrderByDescending(x => x.Count)
-                .GroupBy(tuple => tuple.Count)
-                .Select(grouping =>
-                    $"**{grouping.Key}** × " +
-                    $"{string.Join(" ", grouping.Select(x => x.reaction.Emoji))}"));
+                msg.Reactions
+                    .Where(reaction => reaction.Count >= threshold)
+                    .Select(reaction => (reaction, reaction.Count))
+                    .OrderByDescending(tuple => tuple.Count)
+                    .GroupBy(tuple => tuple.Count)
+                    .Select(grouping =>
+                        $"**{grouping.Key}** × " +
+                        $"{string.Join(" ", grouping.Select(x => x.reaction.Emoji))}"));
 
         private async void PostMessageToBoard(DiscordMessage msg, BoardDatabase.Board board, string reactions)
         {
