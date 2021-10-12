@@ -46,6 +46,7 @@ namespace MeiyounaiseSlash.Core
                 .BuildServiceProvider();
 
             var boardService = new BoardService(services.GetService(typeof(BoardDatabase)) as BoardDatabase);
+            var guildService = new GuildService(services.GetService(typeof(GuildDatabase)) as GuildDatabase);
 
             Client = new DiscordClient(new DiscordConfiguration
             {
@@ -63,17 +64,21 @@ namespace MeiyounaiseSlash.Core
                 Services = services
             });
 
-            RegisterHandlers(boardService);
+            RegisterHandlers(boardService, guildService);
 
             SlashCommands.RegisterCommands<MiscCommands>(328353999508209678);
             SlashCommands.RegisterCommands<Account>(328353999508209678);
             SlashCommands.RegisterCommands<BoardCommands>(328353999508209678);
+            SlashCommands.RegisterCommands<GuildCommands>(328353999508209678);
         }
 
-        private void RegisterHandlers(BoardService boardService)
+        private void RegisterHandlers(BoardService boardService, GuildService guildService)
         {
             Client.MessageReactionAdded += boardService.ReactionAdded;
             Client.MessageReactionRemoved += boardService.ReactionRemoved;
+            Client.GuildMemberAdded += guildService.MemberJoined;
+            Client.GuildMemberRemoved += guildService.MemberLeft;
+            Client.MessageCreated += guildService.RepeatMessage;
             SlashCommands.SlashCommandErrored += ExceptionHandler.SlashCommandErrored;
         }
 
