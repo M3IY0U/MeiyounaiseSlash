@@ -59,5 +59,29 @@ namespace MeiyounaiseSlash.Data
             guild.RepeatMessages = (int) amount;
             GuildCollection.Update(guild);
         }
+
+        public void SetChannel(ulong guildId, ulong channelId, bool isJoinChannel)
+        {
+            var guild = GetOrCreateGuild(guildId);
+
+            if (isJoinChannel)
+                guild.JoinChannel = channelId;
+            else
+                guild.LeaveChannel = channelId;
+
+            GuildCollection.Update(guild);
+        }
+        
+        public void SetMessage(ulong guildId, string message, bool isJoinMessage)
+        {
+            var guild = GetOrCreateGuild(guildId);
+
+            if (isJoinMessage)
+                guild.JoinMessage = message;
+            else
+                guild.LeaveMessage = message;
+
+            GuildCollection.Update(guild);
+        }
     }
 }
