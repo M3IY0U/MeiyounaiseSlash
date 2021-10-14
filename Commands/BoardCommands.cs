@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -87,7 +88,7 @@ namespace MeiyounaiseSlash.Commands
 
             switch (action)
             {
-                case BlacklistAction.Add:
+                case BlacklistAction.add:
                     if (channel?.Type is not ChannelType.Text && channel?.Type is not ChannelType.PublicThread)
                         throw new CommandException("Invalid channel provided.");
                     if (!BoardDatabase.TryGetBoard(b => b.GuildId == ctx.Guild.Id,
@@ -99,7 +100,7 @@ namespace MeiyounaiseSlash.Commands
                         $"{Constants.CheckEmoji} Channel {channel.Mention} has been added to the blacklist."));
 
                     break;
-                case BlacklistAction.Remove:
+                case BlacklistAction.remove:
                     if (channel is null)
                         throw new CommandException("You need to provide a channel to remove.");
                     if (!BoardDatabase.TryGetBoard(b => b.GuildId == ctx.Guild.Id,
@@ -113,7 +114,7 @@ namespace MeiyounaiseSlash.Commands
                         $"{Constants.CheckEmoji} Channel {channel.Mention} has been removed from the blacklist."));
 
                     break;
-                case BlacklistAction.Clear:
+                case BlacklistAction.clear:
                     if (!BoardDatabase.TryGetBoard(b => b.GuildId == ctx.Guild.Id, out _))
                         throw new CommandException("There currently is no board in the provided channel.");
 
@@ -145,7 +146,7 @@ namespace MeiyounaiseSlash.Commands
                     }
 
                     break;
-                case BlacklistAction.List:
+                case BlacklistAction.list:
                     if (!BoardDatabase.TryGetBoard(b => b.GuildId == ctx.Guild.Id,
                         out board))
                         throw new CommandException("There currently is no board in the provided channel.");
@@ -160,12 +161,14 @@ namespace MeiyounaiseSlash.Commands
             }
         }
 
+        
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         public enum BlacklistAction
         {
-            [ChoiceName("add")] Add,
-            [ChoiceName("remove")] Remove,
-            [ChoiceName("clear")] Clear,
-            [ChoiceName("list")] List
+            [ChoiceName("add")] add,
+            [ChoiceName("remove")] remove,
+            [ChoiceName("clear")] clear,
+            [ChoiceName("list")] list
         }
     }
 }

@@ -19,16 +19,7 @@ namespace MeiyounaiseSlash.Services
                 SKSurface.Create(new SKImageInfo(Math.Min(items.Count * AlbumSize, 1500),
                     ((items.Count - 1) / 5 + 1) * AlbumSize));
             var canvas = surface.Canvas;
-            var paint = new SKPaint
-            {
-                Color = SKColors.White,
-                IsAntialias = true,
-                Typeface = SKTypeface.FromFile("arial-unicode-ms.ttf"),
-                Style = SKPaintStyle.StrokeAndFill,
-                FakeBoldText = true,
-                ImageFilter = SKImageFilter.CreateDropShadow(1, 1, 3, 3, SKColors.Black),
-                TextSize = 24
-            };
+            var paint = Constants.ChartFont;
 
             canvas.Clear(SKColors.Transparent);
 

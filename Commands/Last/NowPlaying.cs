@@ -16,10 +16,23 @@ namespace MeiyounaiseSlash.Commands.Last
         public UserDatabase UserDatabase { get; set; }
         public LastfmClient LastClient { get; set; }
 
+        [SlashCommand("np", "Returns currently playing or last played song for a user.")]
+        public async Task NowPlayingAlias(InteractionContext ctx,
+            [Option("user", "The user to fetch, leave blank for own account.")]
+            DiscordUser user = null)
+        {
+            await HandleNowPlayingInteraction(ctx, user);
+        }
+        
         [SlashCommand("fm", "Returns currently playing or last played song for a user.")]
         public async Task NowPlayingCommand(InteractionContext ctx,
             [Option("user", "The user to fetch, leave blank for own account.")]
             DiscordUser user = null)
+        {
+            await HandleNowPlayingInteraction(ctx, user);
+        }
+        
+        private async Task HandleNowPlayingInteraction(InteractionContext ctx, DiscordUser user = null)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
@@ -35,8 +48,14 @@ namespace MeiyounaiseSlash.Commands.Last
 
             var embed = BuildEmbed(response.Content[0], info.Content);
 
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+            var m =await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+            foreach (var reaction in UserDatabase.GetReactions(ctx.User.Id))
+            {
+                await m.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, reaction));
+                
+            }
         }
+        
 
         private static DiscordEmbed BuildEmbed(LastTrack scrobble, LastUser user)
         {
