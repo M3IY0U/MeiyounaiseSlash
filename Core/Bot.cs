@@ -5,6 +5,7 @@ using DSharpPlus;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
+using IF.Lastfm.Core.Api;
 using MeiyounaiseSlash.Commands;
 using MeiyounaiseSlash.Commands.Last;
 using MeiyounaiseSlash.Data;
@@ -34,7 +35,10 @@ namespace MeiyounaiseSlash.Core
                 Environment.Exit(1);
             }
 
-            Constants.ErrorLogChannel = _config?.ErrorLogChannel;
+            if (_config is null)
+                throw new Exception("Error loading config.");
+
+            Constants.ErrorLogChannel = _config.ErrorLogChannel;
             var prometheus = new MetricServer("localhost", 1234);
             prometheus.Start();
 
@@ -43,7 +47,8 @@ namespace MeiyounaiseSlash.Core
                 .AddSingleton(new GuildDatabase("GuildDatabase.db"))
                 .AddSingleton(new LastDatabase("LastDatabase.db"))
                 .AddSingleton(new UserDatabase("UserDatabase.db"))
-                .BuildServiceProvider();
+                .AddSingleton(new LastfmClient(_config.LastApiKey, _config.LastApiSecret))
+                .BuildServiceProvider(true);
 
             var boardService = new BoardService(services.GetService(typeof(BoardDatabase)) as BoardDatabase);
             var guildService = new GuildService(services.GetService(typeof(GuildDatabase)) as GuildDatabase);
@@ -51,7 +56,7 @@ namespace MeiyounaiseSlash.Core
             Client = new DiscordClient(new DiscordConfiguration
             {
                 Intents = DiscordIntents.All,
-                Token = _config?.Token
+                Token = _config.Token
             });
 
             Client.UseInteractivity(new InteractivityConfiguration
@@ -70,6 +75,8 @@ namespace MeiyounaiseSlash.Core
             SlashCommands.RegisterCommands<Account>(328353999508209678);
             SlashCommands.RegisterCommands<BoardCommands>(328353999508209678);
             SlashCommands.RegisterCommands<GuildCommands>(328353999508209678);
+            SlashCommands.RegisterCommands<NowPlaying>(328353999508209678);
+            SlashCommands.RegisterCommands<AlbumChart>(328353999508209678);
         }
 
         private void RegisterHandlers(BoardService boardService, GuildService guildService)

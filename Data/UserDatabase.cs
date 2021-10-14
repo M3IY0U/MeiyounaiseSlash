@@ -18,8 +18,11 @@ namespace MeiyounaiseSlash.Data
 
         public UserDatabase(string path) : base(path) => _userCollection = Database.GetCollection<User>("users");
 
-        public string GetLastAccount(ulong user)
-            => _userCollection.FindOne(x => x.Id == user)?.LastFm;
+        public bool TryGetLast(ulong user, out string last)
+        {
+            last = _userCollection.FindOne(x => x.Id == user)?.LastFm;
+            return !string.IsNullOrEmpty(last);
+        }
 
         public void SetLastAccount(ulong id, string last)
             => _userCollection.Upsert(new User

@@ -4,5 +4,7 @@ namespace MeiyounaiseSlash.Core
     {
         public string Token { get; init; }
         public ulong ErrorLogChannel { get; init; }
+        public string LastApiKey { get; set; }
+        public string LastApiSecret { get; set; }
     }
 }

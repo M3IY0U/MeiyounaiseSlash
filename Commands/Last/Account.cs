@@ -11,7 +11,7 @@ namespace MeiyounaiseSlash.Commands.Last
     {
         public UserDatabase UserDatabase { get; set; }
 
-        [SlashCommand("set", "Set your last.fm account.")]
+        [SlashCommand("setlast", "Set your last.fm account.")]
         public async Task SetLast(InteractionContext ctx,
             [Option("lastfm", "Your last.fm account name", true)] string last = "")
         {
@@ -21,10 +21,9 @@ namespace MeiyounaiseSlash.Commands.Last
             string content;
             if (string.IsNullOrEmpty(last))
             {
-                last = UserDatabase.GetLastAccount(ctx.User.Id);
-                content = string.IsNullOrEmpty(last)
-                    ? $"{Constants.ErrorEmoji} You have not set your last.fm account yet."
-                    : $"{Constants.InfoEmoji} Your last.fm account is currently set to: `{last}`";
+                content = UserDatabase.TryGetLast(ctx.User.Id, out last)
+                    ? $"{Constants.InfoEmoji} Your last.fm account is currently set to: `{last}`"
+                    : $"{Constants.ErrorEmoji} You have not set your last.fm account yet.";
             }
             else
             {
