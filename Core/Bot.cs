@@ -77,6 +77,7 @@ namespace MeiyounaiseSlash.Core
             SlashCommands.RegisterCommands<GuildCommands>(328353999508209678);
             SlashCommands.RegisterCommands<NowPlaying>(328353999508209678);
             SlashCommands.RegisterCommands<AlbumChart>(328353999508209678);
+            SlashCommands.RegisterCommands<ContextMenuActions>(328353999508209678);
         }
 
         private void RegisterHandlers(BoardService boardService, GuildService guildService)

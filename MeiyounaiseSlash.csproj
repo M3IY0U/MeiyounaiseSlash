@@ -15,6 +15,7 @@
       <PackageReference Include="LiteDB" Version="5.0.11" />
       <PackageReference Include="prometheus-net" Version="5.0.1" />
       <PackageReference Include="SkiaSharp" Version="2.80.3" />
+      <PackageReference Include="YoutubeSearchApi.Net" Version="2021.8.24" />
     </ItemGroup>
 
 </Project>
