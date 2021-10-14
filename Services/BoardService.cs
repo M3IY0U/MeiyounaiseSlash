@@ -117,6 +117,9 @@ namespace MeiyounaiseSlash.Services
                     .Where(e => e.Thumbnail is not null || e.Image is not null)
                     .Select(e => e.Thumbnail is not null ? e.Thumbnail.Url : e.Image.Url)
                     .First().ToString();
+                if(string.IsNullOrEmpty(content[0]))
+                    if(!string.IsNullOrEmpty(msg.Embeds[0].Description))
+                        content.Add(msg.Embeds[0].Description);
             }
             else if (msg.Attachments.Any())
             {
