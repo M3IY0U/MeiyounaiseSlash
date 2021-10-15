@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using IF.Lastfm.Core.Objects;
+using MeiyounaiseSlash.Commands.Last;
 using MeiyounaiseSlash.Utilities;
 using SkiaSharp;
 
@@ -34,12 +35,14 @@ namespace MeiyounaiseSlash.Services
                         wc.DownloadData(album.Images.Largest ?? new Uri(Constants.LastFmUnknownAlbum))), x, y);
 
                 var by = y;
-                y = DrawWrappedText($"{album.ArtistName} -", ref canvas, x + Offset, y + 25, AlbumSize - Offset, paint);
-                y = DrawWrappedText($"{album.Name}", ref canvas, x + Offset, y, AlbumSize - Offset, paint);
-                DrawWrappedText($"{album.PlayCount.GetValueOrDefault(0)} Plays", ref canvas, x + Offset, y,
+                y = LastUtil.DrawWrappedText($"{album.ArtistName} -", ref canvas, x + Offset, y + 25,
+                    AlbumSize - Offset, paint);
+                LastUtil.DrawWrappedText($"{album.Name}", ref canvas, x + Offset, y, AlbumSize - Offset, paint);
+                LastUtil.DrawWrappedText($"{album.PlayCount.GetValueOrDefault(0)} Plays", ref canvas, x + Offset,
+                    by + AlbumSize - 10,
                     AlbumSize - Offset, paint);
                 y = by;
-
+                
                 x += 300;
                 if (++count % 5 != 0) continue;
                 y += 300;
@@ -47,41 +50,6 @@ namespace MeiyounaiseSlash.Services
             }
 
             return surface.Snapshot().Encode(SKEncodedImageFormat.Png, 100).AsStream();
-        }
-
-        private static float DrawWrappedText(string text, ref SKCanvas canvas, float x, float y, float maxlength,
-            SKPaint paint)
-        {
-            var wrapped = new List<string>();
-            var lineLength = 0f;
-            var line = "";
-
-            foreach (var word in text.ToCharArray())
-            {
-                var wordWithSpace = word + "";
-                var wordLength = paint.MeasureText(wordWithSpace);
-                if (lineLength + wordLength > maxlength)
-                {
-                    wrapped.Add(line);
-                    line = wordWithSpace;
-                    lineLength = wordLength;
-                }
-                else
-                {
-                    line += wordWithSpace;
-                    lineLength += wordLength;
-                }
-            }
-
-            wrapped.Add(line);
-
-            foreach (var wrappedLine in wrapped)
-            {
-                canvas.DrawText(wrappedLine, x, y, paint);
-                y += paint.TextSize + Offset;
-            }
-
-            return y;
         }
     }
 }

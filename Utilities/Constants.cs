@@ -21,7 +21,7 @@ namespace MeiyounaiseSlash.Utilities
         {
             Color = SKColors.White,
             IsAntialias = true,
-            Typeface = SKTypeface.FromFile("arial-unicode-ms.ttf"),
+            Typeface = SKTypeface.FromFile("merged.ttf"),
             Style = SKPaintStyle.StrokeAndFill,
             FakeBoldText = true,
             ImageFilter = SKImageFilter.CreateDropShadow(1, 1, 3, 3, SKColors.Black),
