@@ -35,14 +35,9 @@ namespace MeiyounaiseSlash.Services
             foreach (var (artist, imageUrl) in images)
             {
                 var img = SKImage.FromEncodedData(wc.DownloadData(imageUrl ?? Constants.LastFmUnknownArtist));
-
-
-                var s = img.Width == img.Height
-                    ? img.Width
-                    : img.Width < img.Height
-                        ? img.Width
-                        : img.Height;
-
+                
+                var s = Math.Min(img.Width, img.Height);
+                
                 canvas.DrawImage(img, SKRect.Create((img.Width - s) / 2f, (img.Height - s) / 2f, s, s),
                     SKRect.Create(x, y, ArtistSize, ArtistSize));
 
