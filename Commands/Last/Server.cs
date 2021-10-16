@@ -30,10 +30,7 @@ namespace MeiyounaiseSlash.Commands.Last
                 .Select(np => $"<@{np.Id}> " +
                               Formatter.MaskedUrl("🔊", new Uri($"https://www.last.fm/user/{np.Last}")) + " " +
                               Formatter.MaskedUrl(np.Track.ArtistName, np.Track.ArtistUrl) + " - " +
-                              Formatter.MaskedUrl(np.Track.Name, new Uri(np.Track.Url.ToString()
-                                  .Replace("(", "\\(")
-                                  .Replace(")", "\\)")
-                                  .Replace("　", "%E3%80%80"))))
+                              Formatter.MaskedUrl(np.Track.Name, LastUtil.CleanLastUrl(np.Track.Url)))
                 .ToList();
 
             if (texts.Count == 0)

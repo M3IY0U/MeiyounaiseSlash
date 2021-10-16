@@ -7,6 +7,7 @@ using DSharpPlus.SlashCommands;
 using IF.Lastfm.Core.Api;
 using MeiyounaiseSlash.Data;
 using MeiyounaiseSlash.Exceptions;
+using MeiyounaiseSlash.Utilities;
 
 namespace MeiyounaiseSlash.Commands.Last
 {
@@ -38,7 +39,7 @@ namespace MeiyounaiseSlash.Commands.Last
                 .WithColor(DiscordColor.Red)
                 .WithThumbnail(response.Content[0].Images.Large != null
                     ? response.Content[0].Images.Large.AbsoluteUri.Replace("/174s/", "/")
-                    : "https://lastfm.freetls.fastly.net/i/u/174s/c6f59c1e5e7240a4c0d427abd71f3dbb");
+                    : Constants.LastFmUnknownAlbum);
 
             if (amount > 10)
                 amount = 10;
@@ -47,9 +48,10 @@ namespace MeiyounaiseSlash.Commands.Last
             {
                 var ago = Formatter.Timestamp(track.TimePlayed ?? DateTime.Now);
                 eb.AddField(ago, string.Concat(
-                    $"[{track.ArtistName}](https://www.last.fm/music/{track.ArtistName.Replace(" ", "+").Replace("(", "\\(").Replace(")", "\\)")})",
+                    Formatter.MaskedUrl(track.ArtistName,
+                        LastUtil.CleanLastUrl($"https://www.last.fm/music/{track.ArtistName}")),
                     " - ",
-                    $"[{track.Name}]({track.Url.ToString().Replace("(", "\\(").Replace(")", "\\)").Replace("　", "%E3%80%80")})"));
+                    Formatter.MaskedUrl(track.Name, LastUtil.CleanLastUrl(track.Url))));
             }
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(eb));

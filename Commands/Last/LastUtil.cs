@@ -151,5 +151,14 @@ namespace MeiyounaiseSlash.Commands.Last
                 return new NowPlayingStruct();
             }
         }
+
+        public static Uri CleanLastUrl(string url)
+            => new(url.Replace("(", "\\(")
+                .Replace(")", "\\)")
+                .Replace(" ", "+")
+                .Replace("　", "%E3%80%80"));
+
+        public static Uri CleanLastUrl(Uri uri)
+            => CleanLastUrl(uri.ToString());
     }
 }
