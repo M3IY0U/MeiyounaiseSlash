@@ -12,7 +12,7 @@ using MeiyounaiseSlash.Utilities;
 namespace MeiyounaiseSlash.Commands.Last
 {
     [SlashCommandGroup("set", "Set various last.fm related info.")]
-    public class Account : ApplicationCommandModule
+    public class SetCommand : ApplicationCommandModule
     {
         public UserDatabase UserDatabase { get; set; }
 

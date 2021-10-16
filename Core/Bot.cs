@@ -1,13 +1,12 @@
 using System;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using IF.Lastfm.Core.Api;
-using MeiyounaiseSlash.Commands;
-using MeiyounaiseSlash.Commands.Last;
 using MeiyounaiseSlash.Data;
 using MeiyounaiseSlash.Exceptions;
 using MeiyounaiseSlash.Services;
@@ -70,17 +69,8 @@ namespace MeiyounaiseSlash.Core
             });
 
             RegisterHandlers(boardService, guildService);
-
-            SlashCommands.RegisterCommands<MiscCommands>(328353999508209678);
-            SlashCommands.RegisterCommands<Account>(328353999508209678);
-            SlashCommands.RegisterCommands<BoardCommands>(328353999508209678);
-            SlashCommands.RegisterCommands<GuildCommands>(328353999508209678);
-            SlashCommands.RegisterCommands<NowPlaying>(328353999508209678);
-            SlashCommands.RegisterCommands<AlbumChart>(328353999508209678);
-            SlashCommands.RegisterCommands<ArtistChart>(328353999508209678);
-            SlashCommands.RegisterCommands<ContextMenuActions>(328353999508209678);
-            SlashCommands.RegisterCommands<Recent>(328353999508209678);
-            SlashCommands.RegisterCommands<Server>(328353999508209678);
+            
+            SlashCommands.RegisterCommands(Assembly.GetEntryAssembly(), 328353999508209678);
         }
 
         private void RegisterHandlers(BoardService boardService, GuildService guildService)

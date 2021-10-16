@@ -7,7 +7,7 @@ using MeiyounaiseSlash.Commands.Last;
 using MeiyounaiseSlash.Utilities;
 using SkiaSharp;
 
-namespace MeiyounaiseSlash.Services
+namespace MeiyounaiseSlash.Services.Charts
 {
     public static class AlbumChartImageService
     {

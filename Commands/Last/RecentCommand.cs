@@ -11,13 +11,13 @@ using MeiyounaiseSlash.Utilities;
 
 namespace MeiyounaiseSlash.Commands.Last
 {
-    public class Recent : ApplicationCommandModule
+    public class RecentCommand : ApplicationCommandModule
     {
         public UserDatabase UserDatabase { get; set; }
         public LastfmClient LastClient { get; set; }
 
         [SlashCommand("recent", "Returns most recent scrobbles.")]
-        public async Task RecentCommand(InteractionContext ctx,
+        public async Task Recent(InteractionContext ctx,
             [Option("amount", "Amount of recent scrobbles to show (max 10, default 5)")]
             long amount = 5,
             [Option("user", "User to get recent scrobbles for, leave blank for own account.")]

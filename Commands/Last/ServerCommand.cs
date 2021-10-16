@@ -11,13 +11,13 @@ using MeiyounaiseSlash.Utilities;
 
 namespace MeiyounaiseSlash.Commands.Last
 {
-    public class Server : ApplicationCommandModule
+    public class ServerCommand : ApplicationCommandModule
     {
         public UserDatabase UserDatabase { get; set; }
         public LastfmClient LastClient { get; set; }
 
         [SlashCommand("server", "Show every member who's currently scrobbling something.")]
-        public async Task ServerCommand(InteractionContext ctx)
+        public async Task Server(InteractionContext ctx)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 

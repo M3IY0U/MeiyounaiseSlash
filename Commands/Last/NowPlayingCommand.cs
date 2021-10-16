@@ -11,7 +11,7 @@ using MeiyounaiseSlash.Utilities;
 
 namespace MeiyounaiseSlash.Commands.Last
 {
-    public class NowPlaying : ApplicationCommandModule
+    public class NowPlayingCommand : ApplicationCommandModule
     {
         public UserDatabase UserDatabase { get; set; }
         public LastfmClient LastClient { get; set; }
@@ -25,7 +25,7 @@ namespace MeiyounaiseSlash.Commands.Last
         }
 
         [SlashCommand("fm", "Returns currently playing or last played song for a user.")]
-        public async Task NowPlayingCommand(InteractionContext ctx,
+        public async Task NowPlaying(InteractionContext ctx,
             [Option("user", "The user to fetch, leave blank for own account.")]
             DiscordUser user = null)
         {
