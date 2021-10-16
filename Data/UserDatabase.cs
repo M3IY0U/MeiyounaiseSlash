@@ -60,5 +60,17 @@ namespace MeiyounaiseSlash.Data
             _userCollection.Update(user);
             return user.NowPlayingReactions;
         }
+
+        public IEnumerable<(ulong id, string last)> GetLastUsersInCurrentGuild(IEnumerable<ulong> memberIds)
+        {
+            var result = new List<(ulong, string)>();
+            foreach (var id in memberIds)
+            {
+                if(TryGetLast(id, out var last))
+                    result.Add((id, last));
+            }
+
+            return result;
+        }
     }
 }

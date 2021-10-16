@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using IF.Lastfm.Core.Api;
 using IF.Lastfm.Core.Api.Enums;
 using IF.Lastfm.Core.Objects;
 using MeiyounaiseSlash.Utilities;
@@ -19,16 +20,16 @@ namespace MeiyounaiseSlash.Commands.Last
             {
                 return new[]
                 {
-                    new DiscordApplicationCommandOptionChoice("overall","overall"),
-                    new DiscordApplicationCommandOptionChoice("year","year"),
-                    new DiscordApplicationCommandOptionChoice("half","half"),
-                    new DiscordApplicationCommandOptionChoice("quarter","quarter"),
-                    new DiscordApplicationCommandOptionChoice("month","month"),
-                    new DiscordApplicationCommandOptionChoice("week","week")
+                    new DiscordApplicationCommandOptionChoice("overall", "overall"),
+                    new DiscordApplicationCommandOptionChoice("year", "year"),
+                    new DiscordApplicationCommandOptionChoice("half", "half"),
+                    new DiscordApplicationCommandOptionChoice("quarter", "quarter"),
+                    new DiscordApplicationCommandOptionChoice("month", "month"),
+                    new DiscordApplicationCommandOptionChoice("week", "week")
                 };
             }
         }
-        
+
         public static float DrawWrappedText(string text, ref SKCanvas canvas, float x, float y, float maxlength,
             SKPaint paint)
         {
@@ -76,7 +77,7 @@ namespace MeiyounaiseSlash.Commands.Last
                 _ => LastStatsTimeSpan.Overall
             };
         }
-        
+
         public static async Task<(LastArtist artist, string imageUrl)> ScrapeImageAsync(LastArtist artist)
         {
             using var client = new HttpClient();
@@ -97,7 +98,7 @@ namespace MeiyounaiseSlash.Commands.Last
 
             return (artist, result);
         }
-        
+
         public static async Task<string> ScrapeImageAsync(string artistUrl)
         {
             using var client = new HttpClient();
@@ -114,6 +115,40 @@ namespace MeiyounaiseSlash.Commands.Last
             catch (Exception)
             {
                 return Constants.LastFmUnknownArtist;
+            }
+        }
+
+        public struct NowPlayingStruct
+        {
+            public ulong Id { get; set; }
+            public string Last { get; set; }
+            public LastTrack Track { get; set; }
+        }
+
+        public static async Task<NowPlayingStruct> GetNowPlaying(ulong id,
+            string user,
+            LastfmClient client)
+        {
+            try
+            {
+                var response = await client.User.GetRecentScrobbles(user);
+                if (!response.Success)
+                    return new NowPlayingStruct();
+
+                var track = response.Content[0];
+                if (track?.IsNowPlaying is null || !track.IsNowPlaying.Value)
+                    return new NowPlayingStruct();
+
+                return new NowPlayingStruct
+                {
+                    Id = id,
+                    Last = user,
+                    Track = track
+                };
+            }
+            catch (Exception)
+            {
+                return new NowPlayingStruct();
             }
         }
     }

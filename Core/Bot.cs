@@ -80,6 +80,7 @@ namespace MeiyounaiseSlash.Core
             SlashCommands.RegisterCommands<ArtistChart>(328353999508209678);
             SlashCommands.RegisterCommands<ContextMenuActions>(328353999508209678);
             SlashCommands.RegisterCommands<Recent>(328353999508209678);
+            SlashCommands.RegisterCommands<Server>(328353999508209678);
         }
 
         private void RegisterHandlers(BoardService boardService, GuildService guildService)
