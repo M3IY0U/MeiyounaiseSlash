@@ -11,7 +11,7 @@ namespace MeiyounaiseSlash.Data
         {
             public ulong Id { get; init; }
             public string LastFm { get; set; }
-            public HashSet<ulong> NowPlayingReactions { get; set; } = new ();
+            public HashSet<string> NowPlayingReactions { get; set; } = new ();
         }
 
         #endregion
@@ -33,11 +33,11 @@ namespace MeiyounaiseSlash.Data
                 LastFm = last
             });
 
-        public void AddReaction(ulong userId, ulong reaction)
+        public void AddReaction(ulong userId, string reaction)
         {
             var user = _userCollection.FindOne(u => u.Id == userId);
             if (user is null) return;
-            user.NowPlayingReactions ??= new HashSet<ulong>();
+            user.NowPlayingReactions ??= new HashSet<string>();
             user.NowPlayingReactions.Add(reaction);
             _userCollection.Update(user);
         }
@@ -46,17 +46,17 @@ namespace MeiyounaiseSlash.Data
         {
             var user = _userCollection.FindOne(u => u.Id == userId);
             if (user is null) return;
-            user.NowPlayingReactions ??= new HashSet<ulong>();
+            user.NowPlayingReactions ??= new HashSet<string>();
             user.NowPlayingReactions.Clear();
             _userCollection.Update(user);
         }
 
-        public HashSet<ulong> GetReactions(ulong userId)
+        public HashSet<string> GetReactions(ulong userId)
         {
             var user = _userCollection.FindOne(u => u.Id == userId);
             if (user is null) return null;
             if (user.NowPlayingReactions != null) return user.NowPlayingReactions;
-            user.NowPlayingReactions = new HashSet<ulong>();
+            user.NowPlayingReactions = new HashSet<string>();
             _userCollection.Update(user);
             return user.NowPlayingReactions;
         }

@@ -12,7 +12,7 @@ using MeiyounaiseSlash.Utilities;
 namespace MeiyounaiseSlash.Commands.Last
 {
     [SlashCommandGroup("set", "Set various last.fm related info.")]
-    public class SetCommand : ApplicationCommandModule
+    public class SetCommand : LogCommand
     {
         public UserDatabase UserDatabase { get; set; }
 
@@ -52,14 +52,12 @@ namespace MeiyounaiseSlash.Commands.Last
             {
                 case ReactChoice.add:
                     if (string.IsNullOrEmpty(reaction))
-                        throw new CommandException("You need to provide an emoji id.");
-                    if (DiscordEmoji.TryFromGuildEmote(ctx.Client, Convert.ToUInt64(reaction), out var emoji))
-                    {
-                        if (!emoji.IsAvailable)
-                            throw new CommandException(
-                                "Provided emoji is not available to the bot and thus cannot be set.");
+                        throw new CommandException(
+                            "You need to provide an emoji to add.");
 
-                        UserDatabase.AddReaction(ctx.User.Id, emoji.Id);
+                    if (DiscordEmoji.TryFromName(ctx.Client, $":{reaction.Split(':')[1]}:", out var emoji))
+                    {
+                        UserDatabase.AddReaction(ctx.User.Id, emoji.GetDiscordName());
                         await ctx.EditResponseAsync(
                             Util.EmbedReply($"{Constants.CheckEmoji} Reaction {emoji} was added."));
                     }
@@ -76,18 +74,17 @@ namespace MeiyounaiseSlash.Commands.Last
                     var reactions = UserDatabase.GetReactions(ctx.User.Id);
                     await ctx.EditResponseAsync(Util.EmbedReply(
                         $"{Constants.InfoEmoji} Currently reacting with: " + string.Join(" ",
-                            reactions.Select(r => DiscordEmoji.FromGuildEmote(ctx.Client, r)))));
+                            reactions.Select(r => DiscordEmoji.FromName(ctx.Client, r)))));
                     break;
                 default:
                     throw new CommandException("Invalid option provided.");
             }
         }
-        
+
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         public enum ReactChoice
         {
-            [ChoiceName("add")] 
-            add,
+            [ChoiceName("add")] add,
             [ChoiceName("clear")] clear,
             [ChoiceName("list")] list
         }

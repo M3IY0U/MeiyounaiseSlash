@@ -11,7 +11,7 @@ using MeiyounaiseSlash.Utilities;
 
 namespace MeiyounaiseSlash.Commands.Last
 {
-    public class NowPlayingCommand : ApplicationCommandModule
+    public class NowPlayingCommand : LogCommand
     {
         public UserDatabase UserDatabase { get; set; }
         public LastfmClient LastClient { get; set; }
@@ -51,7 +51,7 @@ namespace MeiyounaiseSlash.Commands.Last
             var m = await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
             foreach (var reaction in UserDatabase.GetReactions(ctx.User.Id))
             {
-                await m.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, reaction));
+                await m.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, reaction));
             }
         }
 
