@@ -12,7 +12,7 @@ using YoutubeSearchApi.Net.Exceptions;
 
 namespace MeiyounaiseSlash.Commands
 {
-    public class MiscCommands : ApplicationCommandModule
+    public class MiscCommands : LogCommand
     {
         [SlashCommand("ping", "Returns bot latencies")]
         public async Task PingCommand(InteractionContext ctx)

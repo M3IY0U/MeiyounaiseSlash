@@ -11,7 +11,7 @@ namespace MeiyounaiseSlash.Commands
 {
     [SlashCommandGroup("guild", "Commands related to guild specific funcionality")]
     [SlashRequireUserPermissions(Permissions.ManageMessages)]
-    public class GuildCommands : ApplicationCommandModule
+    public class GuildCommands : LogCommand
     {
         public GuildDatabase GuildDatabase { get; set; }
 

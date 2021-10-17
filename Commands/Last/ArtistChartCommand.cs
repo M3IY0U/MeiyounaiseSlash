@@ -9,7 +9,7 @@ using MeiyounaiseSlash.Services.Charts;
 
 namespace MeiyounaiseSlash.Commands.Last
 {
-    public class ArtistChartCommand : ApplicationCommandModule
+    public class ArtistChartCommand : LogCommand
     {
         public UserDatabase UserDatabase { get; set; }
         public LastfmClient LastClient { get; set; }

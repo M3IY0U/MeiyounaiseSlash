@@ -15,7 +15,7 @@ namespace MeiyounaiseSlash.Commands
 {
     [SlashCommandGroup("board", "Commands related to emoji boards")]
     [SlashRequireUserPermissions(Permissions.ManageChannels)]
-    public class BoardCommands : ApplicationCommandModule
+    public class BoardCommands : LogCommand
     {
         public BoardDatabase BoardDatabase { get; set; }
 

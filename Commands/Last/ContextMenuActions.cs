@@ -12,7 +12,7 @@ using YoutubeSearchApi.Net.Exceptions;
 
 namespace MeiyounaiseSlash.Commands.Last
 {
-    public class ContextMenuActions : ApplicationCommandModule
+    public class ContextMenuActions : LogCommand
     {
         [ContextMenu(ApplicationCommandType.MessageContextMenu, "Youtube Search")]
         public async Task YoutubeSearch(ContextMenuContext ctx)

@@ -13,7 +13,6 @@ using MeiyounaiseSlash.Services;
 using MeiyounaiseSlash.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using Prometheus;
 
 namespace MeiyounaiseSlash.Core
 {
@@ -38,8 +37,6 @@ namespace MeiyounaiseSlash.Core
                 throw new Exception("Error loading config.");
 
             Constants.ErrorLogChannel = _config.ErrorLogChannel;
-            var prometheus = new MetricServer("localhost", 1234);
-            prometheus.Start();
 
             var services = new ServiceCollection()
                 .AddSingleton(new BoardDatabase("BoardDatabase.db"))

@@ -11,7 +11,7 @@ using MeiyounaiseSlash.Utilities;
 
 namespace MeiyounaiseSlash.Commands.Last
 {
-    public class ServerCommand : ApplicationCommandModule
+    public class ServerCommand : LogCommand
     {
         public UserDatabase UserDatabase { get; set; }
         public LastfmClient LastClient { get; set; }

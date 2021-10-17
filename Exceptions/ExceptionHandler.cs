@@ -52,7 +52,6 @@ namespace MeiyounaiseSlash.Exceptions
                 new DiscordFollowupMessageBuilder()
                     .AddEmbed(new DiscordEmbedBuilder()
                         .WithDescription(content)));
-            Statistics.CommandExceptionCounter.Inc();
         }
     }
 }
