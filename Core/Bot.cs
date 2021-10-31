@@ -42,7 +42,6 @@ namespace MeiyounaiseSlash.Core
             Constants.ErrorLogChannel = _config.ErrorLogChannel;
 
             var services = new ServiceCollection()
-                .AddSingleton(new BoardDatabase("BoardDatabase.db"))
                 .AddSingleton(new SpotifyClient(SpotifyClientConfig.CreateDefault()
                     .WithAuthenticator(new ClientCredentialsAuthenticator(
                         _config.SpotifyClientId,
@@ -52,13 +51,14 @@ namespace MeiyounaiseSlash.Core
                     options.EnableSensitiveDataLogging().UseNpgsql(_config.ConnectionString))
                 .AddScoped<ScrobbleRepository>()
                 .AddScoped<GuildRepository>()
+                .AddScoped<BoardRepository>()
                 .AddScoped<UserRepository>()
                 .BuildServiceProvider();
 
-            //services.GetService<MeiyounaiseContext>()?.Database.EnsureDeleted();
+            // services.GetService<MeiyounaiseContext>()?.Database.EnsureDeleted();
             services.GetService<MeiyounaiseContext>()?.Database.EnsureCreated();
 
-            var boardService = new BoardService(services.GetService(typeof(BoardDatabase)) as BoardDatabase);
+            var boardService = new BoardService(services.GetService<BoardRepository>());
             var guildService = new GuildService(services.GetService<GuildRepository>());
 
 

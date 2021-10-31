@@ -10,6 +10,8 @@ namespace MeiyounaiseSlash.Data
         public DbSet<Scrobble> Scrobbles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Guild> Guilds { get; set; }
+        public DbSet<Board> Boards { get; set; }
+        public DbSet<Message> Messages { get; set; }
 
         public MeiyounaiseContext(DbContextOptions<MeiyounaiseContext> options) : base(options)
         {
@@ -26,6 +28,11 @@ namespace MeiyounaiseSlash.Data
                 .Property(u => u.NowPlayingReactions)
                 .HasConversion(v => JsonConvert.SerializeObject(v),
                     v => JsonConvert.DeserializeObject<HashSet<string>>(v));
+
+            modelBuilder.Entity<Board>()
+                .Property(u => u.BlacklistedChannels)
+                .HasConversion(v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<List<ulong>>(v));
             base.OnModelCreating(modelBuilder);
         }
     }

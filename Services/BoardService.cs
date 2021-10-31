@@ -5,36 +5,35 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using MeiyounaiseSlash.Data;
+using MeiyounaiseSlash.Data.Models;
+using MeiyounaiseSlash.Data.Repositories;
 
 namespace MeiyounaiseSlash.Services
 {
     public class BoardService
     {
-        private BoardDatabase BoardDatabase { get; }
+        private BoardRepository BoardRepository { get; }
 
-        public BoardService(BoardDatabase db)
+        public BoardService(BoardRepository repo)
         {
-            BoardDatabase = db;
+            BoardRepository = repo;
         }
 
         public async Task ReactionAdded(DiscordClient sender, MessageReactionAddEventArgs args)
         {
             if (args.User.IsBot) return;
-            if (!BoardDatabase.TryGetBoard(b => b.GuildId == args.Guild.Id
-                                                && !b.BlacklistedChannels.Contains(args.Channel.Id), out var board))
+            if (!BoardRepository.TryGetBoard(b => b.GuildId == args.Guild.Id, out var board))
+                return;
+            if (board.BlacklistedChannels.Contains(args.Channel.Id))
                 return;
 
-            var dbMsg = BoardDatabase.MessageCollection.FindOne(msg => msg.Id == args.Message.Id);
+            var dbMsg = BoardRepository.GetMessage(args.Message.Id);
             var sourceMsg = await args.Channel.GetMessageAsync(args.Message.Id);
 
             if (dbMsg is null)
-                BoardDatabase.MessageCollection.Insert(new BoardDatabase.Message
-                {
-                    Id = sourceMsg.Id,
-                    HasBeenSent = false,
-                    IdInBoard = 0
-                });
+            {
+                BoardRepository.InsertMessage(sourceMsg.Id);
+            }
 
             if (dbMsg is not null && dbMsg.HasBeenSent)
             {
@@ -55,11 +54,12 @@ namespace MeiyounaiseSlash.Services
         public async Task ReactionRemoved(DiscordClient sender, MessageReactionRemoveEventArgs args)
         {
             if (args.User.IsBot) return;
-            if (!BoardDatabase.TryGetBoard(b => b.GuildId == args.Guild.Id
-                                                && !b.BlacklistedChannels.Contains(args.Channel.Id), out var board))
+            if (!BoardRepository.TryGetBoard(b => b.GuildId == args.Guild.Id, out var board))
+                return;
+            if (board.BlacklistedChannels.Contains(args.Channel.Id))
                 return;
 
-            var dbMsg = BoardDatabase.MessageCollection.FindOne(msg => msg.Id == args.Message.Id);
+            var dbMsg = BoardRepository.GetMessage(args.Message.Id);
 
             if (dbMsg is not null && dbMsg.HasBeenSent)
             {
@@ -75,7 +75,7 @@ namespace MeiyounaiseSlash.Services
                     await msgInBoard.DeleteAsync();
                     dbMsg.HasBeenSent = false;
                     dbMsg.IdInBoard = 0;
-                    BoardDatabase.MessageCollection.Update(dbMsg);
+                    BoardRepository.UpdateMessage(dbMsg);
                 }
             }
         }
@@ -91,7 +91,7 @@ namespace MeiyounaiseSlash.Services
                         $"**{grouping.Key}** × " +
                         $"{string.Join(" ", grouping.Select(x => x.reaction.Emoji))}"));
 
-        private async void PostMessageToBoard(DiscordMessage msg, BoardDatabase.Board board, string reactions)
+        private async void PostMessageToBoard(DiscordMessage msg, Board board, string reactions)
         {
             var embed = BoardEmbedFromMessage(msg, reactions);
 
@@ -99,10 +99,10 @@ namespace MeiyounaiseSlash.Services
                 .SendMessageAsync(new DiscordMessageBuilder()
                     .WithEmbed(embed));
 
-            var dbMsg = BoardDatabase.MessageCollection.FindOne(x => x.Id == msg.Id);
+            var dbMsg = BoardRepository.GetMessage(msg.Id);
             dbMsg.HasBeenSent = true;
             dbMsg.IdInBoard = boardMsg.Id;
-            BoardDatabase.MessageCollection.Update(dbMsg);
+            BoardRepository.UpdateMessage(dbMsg);
         }
 
         private static DiscordEmbed BoardEmbedFromMessage(DiscordMessage msg, string reactions)
@@ -117,8 +117,8 @@ namespace MeiyounaiseSlash.Services
                     .Where(e => e.Thumbnail is not null || e.Image is not null)
                     .Select(e => e.Thumbnail is not null ? e.Thumbnail.Url : e.Image.Url)
                     .First().ToString();
-                if(string.IsNullOrEmpty(content[0]))
-                    if(!string.IsNullOrEmpty(msg.Embeds[0].Description))
+                if (string.IsNullOrEmpty(content[0]))
+                    if (!string.IsNullOrEmpty(msg.Embeds[0].Description))
                         content.Add(msg.Embeds[0].Description);
             }
             else if (msg.Attachments.Any())
