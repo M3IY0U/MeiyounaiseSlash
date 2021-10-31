@@ -13,6 +13,7 @@ using MeiyounaiseSlash.Services;
 using MeiyounaiseSlash.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using SpotifyAPI.Web;
 
 namespace MeiyounaiseSlash.Core
 {
@@ -43,6 +44,10 @@ namespace MeiyounaiseSlash.Core
                 .AddSingleton(new GuildDatabase("GuildDatabase.db"))
                 .AddSingleton(new LastDatabase("LastDatabase.db"))
                 .AddSingleton(new UserDatabase("UserDatabase.db"))
+                .AddSingleton(new SpotifyClient(SpotifyClientConfig.CreateDefault()
+                    .WithAuthenticator(new ClientCredentialsAuthenticator(
+                        _config.SpotifyClientId,
+                        _config.SpotifyClientSecret))))
                 .AddSingleton(new LastfmClient(_config.LastApiKey, _config.LastApiSecret))
                 .BuildServiceProvider(true);
 
@@ -57,7 +62,7 @@ namespace MeiyounaiseSlash.Core
 
             Client.UseInteractivity(new InteractivityConfiguration
             {
-                Timeout = TimeSpan.FromSeconds(10)
+                AckPaginationButtons = true
             });
 
             SlashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration
@@ -66,7 +71,7 @@ namespace MeiyounaiseSlash.Core
             });
 
             RegisterHandlers(boardService, guildService);
-            
+
             SlashCommands.RegisterCommands(Assembly.GetEntryAssembly(), 328353999508209678);
         }
 

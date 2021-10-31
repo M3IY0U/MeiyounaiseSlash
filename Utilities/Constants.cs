@@ -24,8 +24,8 @@ namespace MeiyounaiseSlash.Utilities
             Typeface = SKTypeface.FromFile("merged.ttf"),
             Style = SKPaintStyle.StrokeAndFill,
             FakeBoldText = true,
-            ImageFilter = SKImageFilter.CreateDropShadow(1, 1, 3, 3, SKColors.Black),
-            TextSize = 24
+            ImageFilter = SKImageFilter.CreateDropShadow(3, 3, 0, 0, SKColors.Black),
+            TextSize = 22
         };
     }
 }

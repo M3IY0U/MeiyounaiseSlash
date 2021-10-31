@@ -32,10 +32,10 @@ namespace MeiyounaiseSlash.Commands.Last
 
             if (!string.IsNullOrEmpty(streaks))
                 await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(new DiscordEmbedBuilder()
-                        .WithAuthor($"Current streaks for {user.Username}",
-                            $"https://www.last.fm/user/{last}", user.AvatarUrl)
-                        .WithDescription(streaks)));
+                    new DiscordWebhookBuilder()
+                        .AddEmbed(new DiscordEmbedBuilder()
+                            .WithAuthor($"Current streaks for {user.Username}", $"https://www.last.fm/user/{last}", user.AvatarUrl)
+                            .WithDescription(streaks)));
             else
                 await ctx.EditResponseAsync(
                     Util.EmbedReply(
@@ -45,9 +45,9 @@ namespace MeiyounaiseSlash.Commands.Last
         private async Task<string> GetStreaksForUser(string last)
         {
             bool cTrack = true, cAlbum = true, cArtist = true;
-            int trackCount = 1, albumCount = 1, artistCount = 1, page = 1;
+            int trackCount = 1, albumCount = 1, artistCount = 1;
 
-            var tracks = await LastClient.User.GetRecentScrobbles(last, pagenumber: page, count: 1000);
+            var tracks = await LastClient.User.GetRecentScrobbles(last, pagenumber: 1, count: 1000);
             if (!tracks.Success)
                 throw new CommandException("last.fm's response was not successful.");
             var firstTrack = tracks.Content[0];
