@@ -44,7 +44,6 @@ namespace MeiyounaiseSlash.Core
             var services = new ServiceCollection()
                 .AddSingleton(new BoardDatabase("BoardDatabase.db"))
                 .AddSingleton(new GuildDatabase("GuildDatabase.db"))
-                .AddSingleton(new UserDatabase("UserDatabase.db"))
                 .AddSingleton(new SpotifyClient(SpotifyClientConfig.CreateDefault()
                     .WithAuthenticator(new ClientCredentialsAuthenticator(
                         _config.SpotifyClientId,
@@ -52,11 +51,13 @@ namespace MeiyounaiseSlash.Core
                 .AddSingleton(new LastfmClient(_config.LastApiKey, _config.LastApiSecret))
                 .AddDbContext<MeiyounaiseContext>(options => options.UseNpgsql(_config.ConnectionString))
                 .AddScoped<ScrobbleRepository>()
+                .AddScoped<UserRepository>()
                 .BuildServiceProvider();
 
             var boardService = new BoardService(services.GetService(typeof(BoardDatabase)) as BoardDatabase);
             var guildService = new GuildService(services.GetService(typeof(GuildDatabase)) as GuildDatabase);
 
+            services.GetService<MeiyounaiseContext>()?.Database.EnsureDeleted();
             services.GetService<MeiyounaiseContext>()?.Database.EnsureCreated();
 
             Client = new DiscordClient(new DiscordConfiguration

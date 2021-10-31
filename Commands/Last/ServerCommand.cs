@@ -6,14 +6,14 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using IF.Lastfm.Core.Api;
-using MeiyounaiseSlash.Data;
+using MeiyounaiseSlash.Data.Repositories;
 using MeiyounaiseSlash.Utilities;
 
 namespace MeiyounaiseSlash.Commands.Last
 {
     public class ServerCommand : LogCommand
     {
-        public UserDatabase UserDatabase { get; set; }
+        public UserRepository UserRepository { get; set; }
         public LastfmClient LastClient { get; set; }
 
         [SlashCommand("server", "Show every member who's currently scrobbling something.")]
@@ -21,7 +21,7 @@ namespace MeiyounaiseSlash.Commands.Last
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var users = UserDatabase.GetLastUsersInCurrentGuild(ctx.Guild.Members.Keys);
+            var users = await UserRepository.GetLastUsersInCurrentGuild(ctx.Guild.Members.Keys);
 
             var currentlyScrobbling =
                 await Task.WhenAll(users.Select(x => LastUtil.GetNowPlaying(x.id, x.last, LastClient)));

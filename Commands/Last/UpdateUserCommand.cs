@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.SlashCommands;
 using IF.Lastfm.Core.Api;
-using MeiyounaiseSlash.Data;
 using MeiyounaiseSlash.Data.Models;
 using MeiyounaiseSlash.Data.Repositories;
 using MeiyounaiseSlash.Exceptions;
@@ -15,7 +14,7 @@ namespace MeiyounaiseSlash.Commands.Last
 {
     public class UpdateUserCommand : LogCommand
     {
-        public UserDatabase UserDatabase { get; set; }
+        public UserRepository UserRepository { get; set; }
         public LastfmClient LastClient { get; set; }
         public ScrobbleRepository ScrobbleRepository { get; set; }
 
@@ -26,7 +25,7 @@ namespace MeiyounaiseSlash.Commands.Last
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            if (!UserDatabase.TryGetLast(ctx.User.Id, out var last))
+            if (!await UserRepository.TryGetLast(ctx.User.Id, out var last))
                 throw new CommandException("You have not set your last account yet.");
 
             await ScrobbleRepository.ClearScrobblesForUserAsync(ctx.User.Id);
