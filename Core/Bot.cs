@@ -40,25 +40,27 @@ namespace MeiyounaiseSlash.Core
                 throw new Exception("Error loading config.");
 
             Constants.ErrorLogChannel = _config.ErrorLogChannel;
-            
+
             var services = new ServiceCollection()
                 .AddSingleton(new BoardDatabase("BoardDatabase.db"))
-                .AddSingleton(new GuildDatabase("GuildDatabase.db"))
                 .AddSingleton(new SpotifyClient(SpotifyClientConfig.CreateDefault()
                     .WithAuthenticator(new ClientCredentialsAuthenticator(
                         _config.SpotifyClientId,
                         _config.SpotifyClientSecret))))
                 .AddSingleton(new LastfmClient(_config.LastApiKey, _config.LastApiSecret))
-                .AddDbContext<MeiyounaiseContext>(options => options.UseNpgsql(_config.ConnectionString))
+                .AddDbContext<MeiyounaiseContext>(options =>
+                    options.EnableSensitiveDataLogging().UseNpgsql(_config.ConnectionString))
                 .AddScoped<ScrobbleRepository>()
+                .AddScoped<GuildRepository>()
                 .AddScoped<UserRepository>()
                 .BuildServiceProvider();
 
-            var boardService = new BoardService(services.GetService(typeof(BoardDatabase)) as BoardDatabase);
-            var guildService = new GuildService(services.GetService(typeof(GuildDatabase)) as GuildDatabase);
-
-            services.GetService<MeiyounaiseContext>()?.Database.EnsureDeleted();
+            //services.GetService<MeiyounaiseContext>()?.Database.EnsureDeleted();
             services.GetService<MeiyounaiseContext>()?.Database.EnsureCreated();
+
+            var boardService = new BoardService(services.GetService(typeof(BoardDatabase)) as BoardDatabase);
+            var guildService = new GuildService(services.GetService<GuildRepository>());
+
 
             Client = new DiscordClient(new DiscordConfiguration
             {

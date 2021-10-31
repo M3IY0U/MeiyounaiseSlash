@@ -3,7 +3,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
-using MeiyounaiseSlash.Data;
+using MeiyounaiseSlash.Data.Repositories;
 using MeiyounaiseSlash.Exceptions;
 using MeiyounaiseSlash.Utilities;
 
@@ -13,7 +13,7 @@ namespace MeiyounaiseSlash.Commands
     [SlashRequireUserPermissions(Permissions.ManageMessages)]
     public class GuildCommands : LogCommand
     {
-        public GuildDatabase GuildDatabase { get; set; }
+        public GuildRepository GuildRepository { get; set; }
 
         [SlashCommand("repeatmsg", "Change if the bot repeats your message after a set amount")]
         public async Task RepeatMessageConfig(InteractionContext ctx,
@@ -24,14 +24,14 @@ namespace MeiyounaiseSlash.Commands
 
             if (amount == -1)
             {
-                var repeatMessages = GuildDatabase.GetOrCreateGuild(ctx.Guild.Id).RepeatMessages;
+                var guild = await GuildRepository.GetOrCreateGuild(ctx.Guild.Id);
                 await ctx.EditResponseAsync(
                     Util.EmbedReply(
-                        $"{Constants.InfoEmoji} Currently repeating messages after {repeatMessages} identical ones."));
+                        $"{Constants.InfoEmoji} Currently repeating messages after {guild.RepeatMessages} identical ones."));
                 return;
             }
 
-            GuildDatabase.SetRepeatMsg(ctx.Guild.Id, amount);
+            await GuildRepository.SetRepeatMsg(ctx.Guild.Id, amount);
             await ctx.EditResponseAsync(
                 Util.EmbedReply(
                     $"{Constants.CheckEmoji} Messages will be repeated after {amount} identical messages."));
@@ -46,7 +46,7 @@ namespace MeiyounaiseSlash.Commands
 
             if (channel.Type != ChannelType.Text)
                 throw new CommandException("Only text channels can be used for this functionality.");
-            GuildDatabase.SetChannel(ctx.Guild.Id, channel.Id, true);
+            await GuildRepository.SetChannel(ctx.Guild.Id, channel.Id, true);
 
             await ctx.EditResponseAsync(
                 Util.EmbedReply($"{Constants.CheckEmoji} Join messages will now be posted in {channel.Mention}"));
@@ -61,7 +61,7 @@ namespace MeiyounaiseSlash.Commands
 
             if (channel.Type != ChannelType.Text)
                 throw new CommandException("Only text channels can be used for this functionality.");
-            GuildDatabase.SetChannel(ctx.Guild.Id, channel.Id, false);
+            await GuildRepository.SetChannel(ctx.Guild.Id, channel.Id, false);
 
             await ctx.EditResponseAsync(
                 Util.EmbedReply($"{Constants.CheckEmoji} Leave messages will now be posted in {channel.Mention}"));
@@ -74,7 +74,7 @@ namespace MeiyounaiseSlash.Commands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            GuildDatabase.SetMessage(ctx.Guild.Id, message, true);
+            await GuildRepository.SetMessage(ctx.Guild.Id, message, true);
 
             await ctx.EditResponseAsync(
                 Util.EmbedReply($"{Constants.CheckEmoji} Join message set to: `{message}`"));
@@ -87,7 +87,7 @@ namespace MeiyounaiseSlash.Commands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            GuildDatabase.SetMessage(ctx.Guild.Id, message, false);
+            await GuildRepository.SetMessage(ctx.Guild.Id, message, false);
 
             await ctx.EditResponseAsync(
                 Util.EmbedReply($"{Constants.CheckEmoji} Leave message set to: `{message}`"));
@@ -103,15 +103,15 @@ namespace MeiyounaiseSlash.Commands
             switch (functionality)
             {
                 case DisableOption.RepeatMsg:
-                    GuildDatabase.SetRepeatMsg(ctx.Guild.Id, 0);
+                    await GuildRepository.SetRepeatMsg(ctx.Guild.Id, 0);
                     response = "Messages will no longer be repeated.";
                     break;
                 case DisableOption.JoinMsg:
-                    GuildDatabase.SetChannel(ctx.Guild.Id, 0, true);
+                    await GuildRepository.SetChannel(ctx.Guild.Id, 0, true);
                     response = "Join messages will no longer be sent.";
                     break;
                 case DisableOption.LeaveMsg:
-                    GuildDatabase.SetChannel(ctx.Guild.Id, 0, false);
+                    await GuildRepository.SetChannel(ctx.Guild.Id, 0, false);
                     response = "Leave messages will no longer be sent";
                     break;
                 default:

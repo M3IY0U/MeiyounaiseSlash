@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MeiyounaiseSlash.Data.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace MeiyounaiseSlash.Data.Repositories
 {
@@ -14,7 +13,7 @@ namespace MeiyounaiseSlash.Data.Repositories
 
         public virtual Task<bool> TryGetLast(ulong user, out string last)
         {
-            last = Entities.AsNoTracking().FirstOrDefault(x => x.Id == user)?.LastFm;
+            last = Entities.SingleOrDefault(x => x.Id == user)?.LastFm;
             return Task.FromResult(!string.IsNullOrEmpty(last));
         }
 

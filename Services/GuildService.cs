@@ -3,24 +3,24 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using MeiyounaiseSlash.Data;
+using MeiyounaiseSlash.Data.Repositories;
 
 namespace MeiyounaiseSlash.Services
 {
     public class GuildService
     {
-        private GuildDatabase GuildDatabase { get; }
+        private GuildRepository GuildRepository { get; }
         private Dictionary<ulong, (DiscordMessage message, int count)> RepeatMessages { get; }
 
-        public GuildService(GuildDatabase db)
+        public GuildService(GuildRepository db)
         {
-            GuildDatabase = db;
+            GuildRepository = db;
             RepeatMessages = new Dictionary<ulong, (DiscordMessage, int)>();
         }
 
         public async Task MemberJoined(DiscordClient sender, GuildMemberAddEventArgs e)
         {
-            var guild = GuildDatabase.GetOrCreateGuild(e.Guild.Id);
+            var guild = await GuildRepository.GetOrCreateGuild(e.Guild.Id);
             if (guild.JoinChannel == 0 || string.IsNullOrEmpty(guild.JoinMessage))
                 return;
 
@@ -31,7 +31,7 @@ namespace MeiyounaiseSlash.Services
 
         public async Task MemberLeft(DiscordClient sender, GuildMemberRemoveEventArgs e)
         {
-            var guild = GuildDatabase.GetOrCreateGuild(e.Guild.Id);
+            var guild = await GuildRepository.GetOrCreateGuild(e.Guild.Id);
             if (guild.LeaveChannel == 0 || string.IsNullOrEmpty(guild.LeaveMessage))
                 return;
 
@@ -43,7 +43,7 @@ namespace MeiyounaiseSlash.Services
         public async Task RepeatMessage(DiscordClient sender, MessageCreateEventArgs e)
         {
             if (e.Author.IsBot) return;
-            var guild = GuildDatabase.GetOrCreateGuild(e.Guild.Id);
+            var guild = await GuildRepository.GetOrCreateGuild(e.Guild.Id);
             if (guild.RepeatMessages == 0) return;
 
             // add channel 

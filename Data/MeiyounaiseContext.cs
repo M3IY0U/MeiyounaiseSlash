@@ -9,6 +9,7 @@ namespace MeiyounaiseSlash.Data
     {
         public DbSet<Scrobble> Scrobbles { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Guild> Guilds { get; set; }
 
         public MeiyounaiseContext(DbContextOptions<MeiyounaiseContext> options) : base(options)
         {
