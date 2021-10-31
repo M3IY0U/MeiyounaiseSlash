@@ -8,9 +8,11 @@ using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using IF.Lastfm.Core.Api;
 using MeiyounaiseSlash.Data;
+using MeiyounaiseSlash.Data.Repositories;
 using MeiyounaiseSlash.Exceptions;
 using MeiyounaiseSlash.Services;
 using MeiyounaiseSlash.Utilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using SpotifyAPI.Web;
@@ -38,21 +40,24 @@ namespace MeiyounaiseSlash.Core
                 throw new Exception("Error loading config.");
 
             Constants.ErrorLogChannel = _config.ErrorLogChannel;
-
+            
             var services = new ServiceCollection()
                 .AddSingleton(new BoardDatabase("BoardDatabase.db"))
                 .AddSingleton(new GuildDatabase("GuildDatabase.db"))
-                .AddSingleton(new LastDatabase("LastDatabase.db"))
                 .AddSingleton(new UserDatabase("UserDatabase.db"))
                 .AddSingleton(new SpotifyClient(SpotifyClientConfig.CreateDefault()
                     .WithAuthenticator(new ClientCredentialsAuthenticator(
                         _config.SpotifyClientId,
                         _config.SpotifyClientSecret))))
                 .AddSingleton(new LastfmClient(_config.LastApiKey, _config.LastApiSecret))
-                .BuildServiceProvider(true);
+                .AddDbContext<MeiyounaiseContext>(options => options.UseNpgsql(_config.ConnectionString))
+                .AddScoped<ScrobbleRepository>()
+                .BuildServiceProvider();
 
             var boardService = new BoardService(services.GetService(typeof(BoardDatabase)) as BoardDatabase);
             var guildService = new GuildService(services.GetService(typeof(GuildDatabase)) as GuildDatabase);
+
+            services.GetService<MeiyounaiseContext>()?.Database.EnsureCreated();
 
             Client = new DiscordClient(new DiscordConfiguration
             {
