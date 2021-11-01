@@ -14,22 +14,29 @@ namespace MeiyounaiseSlash.Commands.Last
 {
     public static class LastUtil
     {
-        public class TimeRangeChoiceProvider : IChoiceProvider
+        public enum TimeSpan
         {
-            public async Task<IEnumerable<DiscordApplicationCommandOptionChoice>> Provider()
-            {
-                return new[]
-                {
-                    new DiscordApplicationCommandOptionChoice("overall", "overall"),
-                    new DiscordApplicationCommandOptionChoice("year", "year"),
-                    new DiscordApplicationCommandOptionChoice("half", "half"),
-                    new DiscordApplicationCommandOptionChoice("quarter", "quarter"),
-                    new DiscordApplicationCommandOptionChoice("month", "month"),
-                    new DiscordApplicationCommandOptionChoice("week", "week")
-                };
-            }
+            [ChoiceName("overall")] Overall,
+            [ChoiceName("year")] Year,
+            [ChoiceName("half")] Half,
+            [ChoiceName("quarter")] Quarter,
+            [ChoiceName("month")] Month,
+            [ChoiceName("week")] Week
         }
-
+        
+        public static LastStatsTimeSpan EnumToTimeSpan(TimeSpan timespan)
+        {
+            return timespan switch
+            {
+                TimeSpan.Week => LastStatsTimeSpan.Week,
+                TimeSpan.Month => LastStatsTimeSpan.Month,
+                TimeSpan.Quarter => LastStatsTimeSpan.Quarter,
+                TimeSpan.Half=> LastStatsTimeSpan.Half,
+                TimeSpan.Year=> LastStatsTimeSpan.Year,
+                _ => LastStatsTimeSpan.Overall
+            };
+        }
+        
         public static float DrawWrappedText(string text, ref SKCanvas canvas, float x, float y, float maxlength,
             SKPaint paint)
         {
@@ -63,19 +70,6 @@ namespace MeiyounaiseSlash.Commands.Last
             }
 
             return y;
-        }
-
-        public static LastStatsTimeSpan StringToTimeSpan(string timespan)
-        {
-            return timespan switch
-            {
-                "week" => LastStatsTimeSpan.Week,
-                "month" => LastStatsTimeSpan.Month,
-                "quarter" => LastStatsTimeSpan.Quarter,
-                "half" => LastStatsTimeSpan.Half,
-                "year" => LastStatsTimeSpan.Year,
-                _ => LastStatsTimeSpan.Overall
-            };
         }
 
         public static async Task<(LastArtist artist, string imageUrl)> ScrapeImageAsync(LastArtist artist)

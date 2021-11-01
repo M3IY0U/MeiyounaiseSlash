@@ -6,6 +6,7 @@ using IF.Lastfm.Core.Api;
 using MeiyounaiseSlash.Data.Repositories;
 using MeiyounaiseSlash.Exceptions;
 using MeiyounaiseSlash.Services.Charts;
+using static MeiyounaiseSlash.Commands.Last.LastUtil;
 
 namespace MeiyounaiseSlash.Commands.Last
 {
@@ -16,8 +17,7 @@ namespace MeiyounaiseSlash.Commands.Last
         
         [SlashCommand("artistchart", "Generate an artist chart.")]
         public async Task ArtistChart(InteractionContext ctx,
-            [ChoiceProvider(typeof(LastUtil.TimeRangeChoiceProvider))]
-            [Option("timerange", "The timerange to fetch scrobbles for.")] string timespan = "overall",
+            [Option("timerange", "The timerange to fetch scrobbles for.")] TimeSpan timespan = TimeSpan.Overall,
             [Option("user", "The user to fetch, leave blank for own account.")]
             DiscordUser user = null)
         {
@@ -28,7 +28,7 @@ namespace MeiyounaiseSlash.Commands.Last
             if (!await UserRepository.TryGetLast(user.Id, out var last))
                 throw new CommandException($"User {user.Mention} has not set their last account.");
 
-            var response = await LastClient.User.GetTopArtists(last, LastUtil.StringToTimeSpan(timespan), 1, 25);
+            var response = await LastClient.User.GetTopArtists(last, EnumToTimeSpan(timespan), 1, 25);
             if (!response.Success)
                 throw new CommandException("last.fm's response was not successful.");
 
