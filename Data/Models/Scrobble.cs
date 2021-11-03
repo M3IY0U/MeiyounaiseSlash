@@ -10,5 +10,6 @@ namespace MeiyounaiseSlash.Data.Models
         public string AlbumName { get; set; }
         public DateTimeOffset TimeStamp { get; set; }
         public ulong UserId { get; set; }
+        public string CoverUrl { get; set; }
     }
 }

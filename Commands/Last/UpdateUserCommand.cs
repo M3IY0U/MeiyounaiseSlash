@@ -55,12 +55,12 @@ namespace MeiyounaiseSlash.Commands.Last
             await ctx.EditResponseAsync(
                 Util.EmbedReply(
                     $"{Constants.CheckEmoji} Fetched {totalTracks} scrobbles.\n{Constants.InfoEmoji} Inserting into database..."));
-            foreach (var scrobbles in allScrobbles)
-            {
+            
+            foreach (var scrobbles in allScrobbles) 
                 await ScrobbleRepository.AddScrobblesAsync(scrobbles);
-            }
 
             await ScrobbleRepository.SaveChangesAsync();
+            await UserRepository.SetLastIndexed(ctx.User.Id, DateTime.Now);
             await Task.Delay(3000);
             await ctx.EditResponseAsync(
                 Util.EmbedReply(
@@ -78,6 +78,7 @@ namespace MeiyounaiseSlash.Commands.Last
             return filteredTracks.Select(t => new Scrobble
             {
                 Name = t.Name, AlbumName = t.AlbumName, ArtistName = t.ArtistName,
+                CoverUrl = t.Images?.Large?.AbsoluteUri.Replace("/174s/", "/") ?? Constants.LastFmUnknownAlbum,
                 TimeStamp = t.TimePlayed.GetValueOrDefault(DateTimeOffset.UnixEpoch), UserId = id
             });
         }

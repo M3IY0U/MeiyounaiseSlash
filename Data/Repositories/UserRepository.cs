@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -85,6 +86,21 @@ namespace MeiyounaiseSlash.Data.Repositories
             }
 
             return result;
+        }
+
+        public async Task SetLastIndexed(ulong userId, DateTime lastIndexed)
+        {
+            var user = Entities.SingleOrDefault(u => u.Id == userId);
+            if (user is null) return;
+            user.LastIndexed = lastIndexed;
+            Entities.Update(user);
+            await Context.SaveChangesAsync();
+        }
+        
+        public Task<DateTime> GetLastIndexed(ulong userId)
+        {
+            var user = Entities.SingleOrDefault(u => u.Id == userId);
+            return Task.FromResult(user?.LastIndexed ?? DateTime.UnixEpoch);
         }
     }
 }

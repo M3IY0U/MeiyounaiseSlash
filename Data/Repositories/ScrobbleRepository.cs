@@ -21,6 +21,16 @@ namespace MeiyounaiseSlash.Data.Repositories
         public virtual async Task AddScrobblesAsync(IEnumerable<Scrobble> scrobbles)
             => await Entities.AddRangeAsync(scrobbles);
 
+        public int GetScrobbleCountForUser(ulong userId)
+            => Entities.AsQueryable().Count(s => s.UserId == userId);
+
+        public Scrobble GetNthScrobble(ulong userId, int number)
+            => Entities.AsQueryable()
+                .Where(s => s.UserId == userId)
+                .OrderBy(s => s.TimeStamp)
+                .Skip(number - 1)
+                .FirstOrDefault();
+
         public virtual async Task SaveChangesAsync() => await Context.SaveChangesAsync();
     }
 }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using IF.Lastfm.Core.Api;
 using IF.Lastfm.Core.Api.Enums;
@@ -23,7 +22,7 @@ namespace MeiyounaiseSlash.Commands.Last
             [ChoiceName("month")] Month,
             [ChoiceName("week")] Week
         }
-        
+
         public static LastStatsTimeSpan EnumToTimeSpan(TimeSpan timespan)
         {
             return timespan switch
@@ -31,12 +30,12 @@ namespace MeiyounaiseSlash.Commands.Last
                 TimeSpan.Week => LastStatsTimeSpan.Week,
                 TimeSpan.Month => LastStatsTimeSpan.Month,
                 TimeSpan.Quarter => LastStatsTimeSpan.Quarter,
-                TimeSpan.Half=> LastStatsTimeSpan.Half,
-                TimeSpan.Year=> LastStatsTimeSpan.Year,
+                TimeSpan.Half => LastStatsTimeSpan.Half,
+                TimeSpan.Year => LastStatsTimeSpan.Year,
                 _ => LastStatsTimeSpan.Overall
             };
         }
-        
+
         public static float DrawWrappedText(string text, ref SKCanvas canvas, float x, float y, float maxlength,
             SKPaint paint)
         {
@@ -119,9 +118,7 @@ namespace MeiyounaiseSlash.Commands.Last
             public LastTrack Track { get; set; }
         }
 
-        public static async Task<NowPlayingStruct> GetNowPlaying(ulong id,
-            string user,
-            LastfmClient client)
+        public static async Task<NowPlayingStruct> GetNowPlaying(ulong id, string user, LastfmClient client)
         {
             try
             {
