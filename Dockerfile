@@ -1,18 +1,16 @@
-﻿FROM mcr.microsoft.com/dotnet/runtime:5.0 AS base
-WORKDIR /app
+﻿FROM bitnami/dotnet-sdk:5 AS base
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+RUN apt-get update && apt-get install -y libfontconfig1
+
+#COPY ./res /app/res #add res later .ttf etc.
+
+FROM base AS build
 WORKDIR /src
-COPY ["MeiyounaiseSlash.csproj", "./"]
-RUN dotnet restore "MeiyounaiseSlash.csproj"
 COPY . .
-WORKDIR "/src/"
-RUN dotnet build "MeiyounaiseSlash.csproj" -c Release -o /app/build
+RUN dotnet restore && dotnet publish "MeiyounaiseSlash.csproj" -c Release -o ./publish
 
-FROM build AS publish
-RUN dotnet publish "MeiyounaiseSlash.csproj" -c Release -o /app/publish
-
-FROM base AS final
+FROM base AS release
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /src/publish .
+
 ENTRYPOINT ["dotnet", "MeiyounaiseSlash.dll"]
