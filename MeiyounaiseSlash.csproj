@@ -16,6 +16,7 @@
       <PackageReference Include="Npgsql" Version="5.0.10" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10" />
       <PackageReference Include="SkiaSharp" Version="2.88.0-preview.155" />
+      <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.0-preview.145" />
       <PackageReference Include="SpotifyAPI.Web" Version="6.2.2" />
       <PackageReference Include="YoutubeSearchApi.Net" Version="2021.8.24" />
     </ItemGroup>
