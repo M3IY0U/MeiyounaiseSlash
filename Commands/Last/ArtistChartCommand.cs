@@ -31,7 +31,7 @@ namespace MeiyounaiseSlash.Commands.Last
             var response = await LastClient.User.GetTopArtists(last, EnumToTimeSpan(timespan), 1, 25);
             if (!response.Success)
                 throw new CommandException("last.fm's response was not successful.");
-
+            
             var image = await ArtistChartImageService.GenerateChart(response.Content);
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddFile("chart.png", image));
