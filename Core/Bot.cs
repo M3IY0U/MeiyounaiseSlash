@@ -49,7 +49,6 @@ namespace MeiyounaiseSlash.Core
                 .AddSingleton(new LastfmClient(_config.LastApiKey, _config.LastApiSecret))
                 .AddDbContext<MeiyounaiseContext>(options =>
                     options.EnableSensitiveDataLogging().UseNpgsql(_config.ConnectionString))
-                .AddScoped<ScrobbleRepository>()
                 .AddScoped<GuildRepository>()
                 .AddScoped<BoardRepository>()
                 .AddScoped<UserRepository>()

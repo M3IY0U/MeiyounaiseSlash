@@ -1,6 +1,9 @@
 ﻿FROM bitnami/dotnet-sdk:5 AS base
 
-RUN apt-get update && apt-get install -y libfontconfig1
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libfontconfig1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 #COPY ./res /app/res #add res later .ttf etc.
 
