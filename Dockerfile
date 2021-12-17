@@ -1,4 +1,4 @@
-﻿FROM bitnami/dotnet-sdk:5 AS base
+FROM bitnami/dotnet:5 AS base
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libfontconfig1 \
@@ -7,7 +7,7 @@ RUN apt-get update \
 
 #COPY ./res /app/res #add res later .ttf etc.
 
-FROM base AS build
+FROM bitnami/dotnet-sdk:5 AS build
 WORKDIR /src
 COPY . .
 RUN dotnet restore && dotnet publish "MeiyounaiseSlash.csproj" -c Release -o ./publish
