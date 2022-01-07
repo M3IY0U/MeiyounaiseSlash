@@ -6,7 +6,6 @@ namespace MeiyounaiseSlash.Exceptions
     {
         public InteractionTimeoutException(string message) : base(message)
         {
-            
         }
     }
 }

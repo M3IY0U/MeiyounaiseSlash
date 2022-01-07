@@ -24,8 +24,7 @@ namespace MeiyounaiseSlash.Core
         public DiscordClient Client { get; }
         public SlashCommandsExtension SlashCommands { get; set; }
         private readonly Config _config;
-
-
+        
         public Bot()
         {
             if (File.Exists("config.json"))
@@ -59,8 +58,7 @@ namespace MeiyounaiseSlash.Core
 
             var boardService = new BoardService(services.GetService<BoardRepository>());
             var guildService = new GuildService(services.GetService<GuildRepository>());
-
-
+            
             Client = new DiscordClient(new DiscordConfiguration
             {
                 Intents = DiscordIntents.All,

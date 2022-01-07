@@ -6,7 +6,6 @@ namespace MeiyounaiseSlash.Exceptions
     {
         public CommandException(string message) : base(message)
         {
-            
         }
     }
 }

@@ -39,7 +39,7 @@ namespace MeiyounaiseSlash.Commands.Last
             await ctx.EditResponseAsync(Util.EmbedReply(content));
         }
 
-        [SlashCommand("reaction", "Set your last.fm account.")]
+        [SlashCommand("reaction", "Set your reactions for now playing embeds.")]
         public async Task ManageReactions(InteractionContext ctx,
             [Option("action", "Action to take")] ReactChoice action,
             [Option("reaction", "Reaction to use")]

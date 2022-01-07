@@ -6,14 +6,12 @@ namespace MeiyounaiseSlash.Data
 {
     public static class CommandDatabase
     {
-
         public class Command
         {
             public string Name { get; set; }
             public ulong User { get; set; }
             public DateTime TimeStamp { get; set; }
             public ulong Channel { get; set; }
-            
         }
 
         private static LiteDatabase _database = new("CommandLog.db");

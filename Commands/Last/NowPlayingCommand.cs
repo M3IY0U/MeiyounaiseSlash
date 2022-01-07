@@ -54,8 +54,7 @@ namespace MeiyounaiseSlash.Commands.Last
                 await m.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, reaction));
             }
         }
-
-
+        
         private static DiscordEmbed BuildEmbed(LastTrack scrobble, LastUser user)
         {
             return new DiscordEmbedBuilder()

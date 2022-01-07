@@ -160,7 +160,6 @@ namespace MeiyounaiseSlash.Commands
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);
             }
         }
-
         
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         public enum BlacklistAction
