@@ -116,7 +116,7 @@ namespace MeiyounaiseSlash.Services
                 imageUrl = msg.Embeds
                     .Where(e => e.Thumbnail is not null || e.Image is not null)
                     .Select(e => e.Thumbnail is not null ? e.Thumbnail.Url : e.Image.Url)
-                    .First().ToString();
+                    .FirstOrDefault()?.ToString();
                 if (string.IsNullOrEmpty(content[0]))
                     if (!string.IsNullOrEmpty(msg.Embeds[0].Description))
                         content.Add(msg.Embeds[0].Description);
@@ -139,6 +139,15 @@ namespace MeiyounaiseSlash.Services
                 .AddField("Link", Formatter.MaskedUrl("Jump to message", msg.JumpLink), true)
                 .WithColor(member.Color)
                 .WithTimestamp(msg.Timestamp);
+
+            if (msg.ReferencedMessage is not null)
+            {
+                embed.AddField("Replying to", msg.ReferencedMessage.Author.Mention, true);
+                var footer = $"\"{msg.ReferencedMessage.Content.Trim()}\"";
+                if (footer.Length > 128)
+                    footer = footer[.. 128] + " [...]\"";
+                embed.WithFooter(footer, msg.ReferencedMessage.Author.AvatarUrl);
+            }
 
             if (content.Count > 0)
                 embed.WithDescription(string.Join("\n", content));
