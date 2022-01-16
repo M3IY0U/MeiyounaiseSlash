@@ -108,7 +108,13 @@ namespace MeiyounaiseSlash.Services
         private static DiscordEmbed BoardEmbedFromMessage(DiscordMessage msg, string reactions)
         {
             var member = (DiscordMember) msg.Author;
-            var content = new List<string> {msg.Content[.. Math.Min(msg.Content.Length, 3920)]};
+            var content = new List<string>
+            {
+                msg.Content.Length > 2048
+                    ? msg.Content[.. 2048] + " [...]"
+                    : msg.Content
+            };
+
             var imageUrl = string.Empty;
 
             if (msg.Embeds.Any())
