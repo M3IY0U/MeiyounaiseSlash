@@ -88,7 +88,6 @@ namespace MeiyounaiseSlash.Core
             Client.GuildMemberRemoved += guildService.MemberLeft;
             Client.MessageCreated += guildService.RepeatMessage;
             SlashCommands.SlashCommandErrored += ExceptionHandler.SlashCommandErrored;
-            Client.MessageCreated += HaikuService.DetectHaiku;
         }
 
         public void Dispose()
