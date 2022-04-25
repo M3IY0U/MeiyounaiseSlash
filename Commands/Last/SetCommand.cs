@@ -21,7 +21,7 @@ namespace MeiyounaiseSlash.Commands.Last
             string last = "")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-                new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                new DiscordInteractionResponseBuilder().AsEphemeral());
 
             string content;
             if (string.IsNullOrEmpty(last))

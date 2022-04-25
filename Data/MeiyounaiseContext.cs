@@ -7,7 +7,6 @@ namespace MeiyounaiseSlash.Data
 {
     public class MeiyounaiseContext : DbContext
     {
-        public DbSet<Scrobble> Scrobbles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Guild> Guilds { get; set; }
         public DbSet<Board> Boards { get; set; }
@@ -19,11 +18,6 @@ namespace MeiyounaiseSlash.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Scrobble>()
-                .Property(p => p.Id)
-                .IsConcurrencyToken()
-                .ValueGeneratedOnAdd();
-
             modelBuilder.Entity<User>()
                 .Property(u => u.NowPlayingReactions)
                 .HasConversion(v => JsonConvert.SerializeObject(v),

@@ -46,7 +46,7 @@ namespace MeiyounaiseSlash.Commands
         [SlashCommand("delete", "Delete a board.")]
         public async Task DeleteBoardCommand(InteractionContext ctx)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
             if (!BoardRepository.TryGetBoard(b => b.GuildId == ctx.Guild.Id, out var board))
                 throw new CommandException("There is no active board in this server.");
