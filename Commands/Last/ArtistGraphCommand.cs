@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -30,7 +31,7 @@ namespace MeiyounaiseSlash.Commands.Last
             if (!await UserRepository.TryGetLast(user.Id, out var last))
                 throw new CommandException($"User {user.Mention} has not set their last account.");
 
-            var response = await LastClient.User.GetRecentScrobbles(last, DateTimeOffset.UtcNow.AddDays(-7), 
+            var response = await LastClient.User.GetRecentScrobbles(last, DateTimeOffset.UtcNow.AddDays(-7),
                 DateTimeOffset.UtcNow, true, 1, 1000);
 
             if (!response.Success)
@@ -45,8 +46,20 @@ namespace MeiyounaiseSlash.Commands.Last
             }
 
             var image = await ArtistGraphImageService.GenerateChart(artist, response.Content);
+            var totalScrobbles = response.Content.Count;
 
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddFile("chart.png", image));
+            var footer = string.IsNullOrEmpty(artist)
+                ? $"{totalScrobbles} total scrobbles this week"
+                : $"{response.Content.Count(s => s.ArtistName == artist)} {artist} scrobbles out of {totalScrobbles} total scrobbles this week";
+
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                .AddFile("chart.png", image)
+                .AddEmbed(new DiscordEmbedBuilder()
+                    .WithImageUrl("attachment://chart.png")
+                    .WithFooter(footer)
+                    .WithAuthor(
+                        $"Weekly {(string.IsNullOrEmpty(artist) ? "" : artist + " ")}Plays for {ctx.Member.DisplayName}",
+                        $"https://www.last.fm/user/{last}")));
         }
     }
 }

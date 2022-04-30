@@ -27,9 +27,9 @@ namespace MeiyounaiseSlash.Commands.Last
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
+            var query = BuildQuery(ctx);
             try
             {
-                var query = BuildQuery(ctx);
                 using var httpClient = new HttpClient();
                 var client = new DefaultSearchClient(new YoutubeSearchBackend());
                 var result = await client.SearchAsync(httpClient, query, 1);
@@ -40,7 +40,7 @@ namespace MeiyounaiseSlash.Commands.Last
             {
                 await ctx.EditResponseAsync(
                     Util.EmbedReply(
-                        $"{Constants.ErrorEmoji} Nothing found using query `{ctx.TargetMessage.Content}`."));
+                        $"{Constants.ErrorEmoji} Nothing found using query `{query}`."));
             }
         }
 
@@ -49,11 +49,10 @@ namespace MeiyounaiseSlash.Commands.Last
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-
+            var query = BuildQuery(ctx);
             try
             {
                 var result = string.Empty;
-                var query = BuildQuery(ctx);
                 var x = await Spotify.Search.Item(new SearchRequest(SearchRequest.Types.All, query));
                 if (x.Tracks.Total > 0)
                     result = x.Tracks.Items?[0].ExternalUrls.First().Value;
@@ -70,7 +69,7 @@ namespace MeiyounaiseSlash.Commands.Last
             {
                 await ctx.EditResponseAsync(
                     Util.EmbedReply(
-                        $"{Constants.ErrorEmoji} Nothing found using query `{ctx.TargetMessage.Content}`."));
+                        $"{Constants.ErrorEmoji} Nothing found using query `{query}`."));
             }
         }
 

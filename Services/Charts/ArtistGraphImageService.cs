@@ -11,8 +11,8 @@ namespace MeiyounaiseSlash.Services.Charts
 {
     public static class ArtistGraphImageService
     {
-        private const int Width = 800;
-        private const int Height = 400;
+        private const int Width = 1000;
+        private const int Height = 600;
         private const float Padding = 25;
 
         public static async Task<Stream> GenerateChart(string artist,
@@ -22,19 +22,18 @@ namespace MeiyounaiseSlash.Services.Charts
             var canvas = surface.Canvas;
             await Task.Run(() =>
             {
-                canvas.DrawImage(SKImage.FromEncodedData("artistgraph-bg.png"), 0, 0);
+                canvas.DrawImage(SKImage.FromEncodedData("artistgraph-bg.png"), SKRect.Create(Width, Height));
 
                 if (!string.IsNullOrEmpty(artist))
                     scrobbles = scrobbles.Where(s => s.ArtistName == artist).ToList();
 
-                CreateWeekImage(ref canvas, Constants.ChartFont, !string.IsNullOrEmpty(artist), scrobbles);
+                CreateWeekImage(ref canvas, Constants.ChartFont, scrobbles);
             });
 
             return surface.Snapshot().Encode(SKEncodedImageFormat.Png, 100).AsStream();
         }
 
-        private static void CreateWeekImage(ref SKCanvas canvas, SKPaint font, bool isArtist,
-            IReadOnlyCollection<LastTrack> scrobbles)
+        private static void CreateWeekImage(ref SKCanvas canvas, SKPaint font, IReadOnlyCollection<LastTrack> scrobbles)
         {
             var paint = new SKPaint
             {
@@ -105,9 +104,6 @@ namespace MeiyounaiseSlash.Services.Charts
                 canvas.DrawPoint(x, y, paint);
                 canvas.DrawText($"{count}", x - tw + tw / 2, y - 10, font);
             }
-
-            canvas.DrawText(isArtist ? $"{scrobbles.First().ArtistName}" : "Weekly Scrobbles", Padding,
-                Padding + font.FontSpacing / 2, font);
         }
     }
 }
