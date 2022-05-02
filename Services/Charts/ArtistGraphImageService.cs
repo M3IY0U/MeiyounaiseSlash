@@ -22,7 +22,7 @@ namespace MeiyounaiseSlash.Services.Charts
             var canvas = surface.Canvas;
             await Task.Run(() =>
             {
-                canvas.DrawImage(SKImage.FromEncodedData("artistgraph-bg.png"), SKRect.Create(Width, Height));
+                canvas.DrawImage(SKImage.FromEncodedData("Resources/trendgraph-bg.png"), SKRect.Create(Width, Height));
 
                 if (!string.IsNullOrEmpty(artist))
                     scrobbles = scrobbles.Where(s => s.ArtistName == artist).ToList();
