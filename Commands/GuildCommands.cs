@@ -5,6 +5,7 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using MeiyounaiseSlash.Data.Repositories;
 using MeiyounaiseSlash.Exceptions;
+using MeiyounaiseSlash.Services;
 using MeiyounaiseSlash.Utilities;
 
 namespace MeiyounaiseSlash.Commands
@@ -46,7 +47,7 @@ namespace MeiyounaiseSlash.Commands
 
             if (channel.Type != ChannelType.Text)
                 throw new CommandException("Only text channels can be used for this functionality.");
-            await GuildRepository.SetChannel(ctx.Guild.Id, channel.Id, true);
+            await GuildRepository.SetChannel(ctx.Guild.Id, channel.Id, GuildRepository.ChannelType.Join);
 
             await ctx.EditResponseAsync(
                 Util.EmbedReply($"{Constants.CheckEmoji} Join messages will now be posted in {channel.Mention}"));
@@ -61,7 +62,7 @@ namespace MeiyounaiseSlash.Commands
 
             if (channel.Type != ChannelType.Text)
                 throw new CommandException("Only text channels can be used for this functionality.");
-            await GuildRepository.SetChannel(ctx.Guild.Id, channel.Id, false);
+            await GuildRepository.SetChannel(ctx.Guild.Id, channel.Id, GuildRepository.ChannelType.Leave);
 
             await ctx.EditResponseAsync(
                 Util.EmbedReply($"{Constants.CheckEmoji} Leave messages will now be posted in {channel.Mention}"));
@@ -93,9 +94,26 @@ namespace MeiyounaiseSlash.Commands
                 Util.EmbedReply($"{Constants.CheckEmoji} Leave message set to: `{message}`"));
         }
 
+        [SlashCommand("pinarchive", "Set the channel to be used as pin archive (unpinned messages get posted there)")]
+        public async Task SetPinArchive(InteractionContext ctx,
+            [Option("channel", "The channel to post old pins in.")]
+            DiscordChannel channel)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
+            if (channel.Type != ChannelType.Text)
+                throw new CommandException("Only text channels can be used for this functionality.");
+            await GuildRepository.SetChannel(ctx.Guild.Id, channel.Id, GuildRepository.ChannelType.PinArchive);
+            
+            await GuildRepository.InitArchive(ctx.Guild.Id, await GuildService.GetPinnedMessagesInGuild(ctx.Guild));
+
+            await ctx.EditResponseAsync(
+                Util.EmbedReply($"{Constants.CheckEmoji} Unpinned messages will now be posted in {channel.Mention}"));
+        }
+
         [SlashCommand("disable", "Disable a guild-specific funtionality")]
-        public async Task Disable(InteractionContext ctx, [Option("functionality", "Functionality to disable")]
-            DisableOption functionality)
+        public async Task Disable(InteractionContext ctx,
+            [Option("functionality", "Functionality to disable")] DisableOption functionality)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
@@ -107,17 +125,21 @@ namespace MeiyounaiseSlash.Commands
                     response = "Messages will no longer be repeated.";
                     break;
                 case DisableOption.JoinMsg:
-                    await GuildRepository.SetChannel(ctx.Guild.Id, 0, true);
+                    await GuildRepository.SetChannel(ctx.Guild.Id, 0, GuildRepository.ChannelType.Join);
                     response = "Join messages will no longer be sent.";
                     break;
                 case DisableOption.LeaveMsg:
-                    await GuildRepository.SetChannel(ctx.Guild.Id, 0, false);
-                    response = "Leave messages will no longer be sent";
+                    await GuildRepository.SetChannel(ctx.Guild.Id, 0, GuildRepository.ChannelType.Leave);
+                    response = "Leave messages will no longer be sent.";
+                    break;
+                case DisableOption.PinArchive:
+                    await GuildRepository.SetChannel(ctx.Guild.Id, 0, GuildRepository.ChannelType.PinArchive);
+                    response = "Unpinned messages will no longer be posted.";
                     break;
                 default:
                     throw new CommandException("This exception should never be thrown");
             }
-            
+
             await ctx.EditResponseAsync(Util.EmbedReply($"{Constants.CheckEmoji} {response}"));
         }
 
@@ -126,6 +148,7 @@ namespace MeiyounaiseSlash.Commands
             [ChoiceName("repeatmsg")] RepeatMsg,
             [ChoiceName("joinmessage")] JoinMsg,
             [ChoiceName("leavemessage")] LeaveMsg,
+            [ChoiceName("pinarchive")] PinArchive,
         }
     }
 }

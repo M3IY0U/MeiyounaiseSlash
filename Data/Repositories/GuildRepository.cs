@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MeiyounaiseSlash.Data.Models;
@@ -6,6 +8,12 @@ namespace MeiyounaiseSlash.Data.Repositories
 {
     public class GuildRepository : BaseRepository<Guild>
     {
+        public enum ChannelType
+        {
+            Join,
+            Leave,
+            PinArchive
+        }
         public GuildRepository(MeiyounaiseContext ctx) : base(ctx)
         {
         }
@@ -25,7 +33,8 @@ namespace MeiyounaiseSlash.Data.Repositories
                 LeaveChannel = 0,
                 JoinMessage = string.Empty,
                 LeaveMessage = string.Empty,
-                RepeatMessages = 0
+                RepeatMessages = 0,
+                PinArchiveChannel = 0
             };
 
             Entities.Add(guild);
@@ -41,14 +50,24 @@ namespace MeiyounaiseSlash.Data.Repositories
             await Context.SaveChangesAsync();
         }
 
-        public virtual async Task SetChannel(ulong guildId, ulong channelId, bool isJoinChannel)
+        public virtual async Task SetChannel(ulong guildId, ulong channelId, ChannelType channelType)
         {
             var guild = await GetOrCreateGuild(guildId);
 
-            if (isJoinChannel)
-                guild.JoinChannel = channelId;
-            else
-                guild.LeaveChannel = channelId;
+            switch (channelType)
+            {
+                case ChannelType.Join:
+                    guild.JoinChannel = channelId;
+                    break;
+                case ChannelType.Leave:
+                    guild.LeaveChannel = channelId;
+                    break;
+                case ChannelType.PinArchive:
+                    guild.PinArchiveChannel = channelId;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(channelType), channelType, null);
+            }
 
             Entities.Update(guild);
             await Context.SaveChangesAsync();
@@ -62,6 +81,24 @@ namespace MeiyounaiseSlash.Data.Repositories
                 guild.JoinMessage = message;
             else
                 guild.LeaveMessage = message;
+
+            Entities.Update(guild);
+            await Context.SaveChangesAsync();
+        }
+
+        public virtual async Task InitArchive(ulong guildId, Dictionary<ulong, List<ulong>> pinnedMessages)
+        {
+            var guild = await GetOrCreateGuild(guildId);
+            guild.PinnedMessages = pinnedMessages;
+
+            Entities.Update(guild);
+            await Context.SaveChangesAsync();
+        }
+        
+        public virtual async Task UpdateArchive(ulong guildId, ulong channelId, List<ulong> pinnedMessages)
+        {
+            var guild = await GetOrCreateGuild(guildId);
+            guild.PinnedMessages[channelId] = pinnedMessages;
 
             Entities.Update(guild);
             await Context.SaveChangesAsync();

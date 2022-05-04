@@ -87,6 +87,7 @@ namespace MeiyounaiseSlash.Core
             Client.GuildMemberAdded += guildService.MemberJoined;
             Client.GuildMemberRemoved += guildService.MemberLeft;
             Client.MessageCreated += guildService.RepeatMessage;
+            Client.ChannelPinsUpdated += guildService.ChannelPinsUpdated;
             SlashCommands.SlashCommandErrored += ExceptionHandler.SlashCommandErrored;
         }
 

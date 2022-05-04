@@ -24,9 +24,15 @@ namespace MeiyounaiseSlash.Data
                     v => JsonConvert.DeserializeObject<HashSet<string>>(v));
 
             modelBuilder.Entity<Board>()
-                .Property(u => u.BlacklistedChannels)
+                .Property(b => b.BlacklistedChannels)
                 .HasConversion(v => JsonConvert.SerializeObject(v),
                     v => JsonConvert.DeserializeObject<List<ulong>>(v));
+            
+            modelBuilder.Entity<Guild>()
+                .Property(g => g.PinnedMessages)
+                .HasConversion(v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<Dictionary<ulong, List<ulong>>>(v));
+
             base.OnModelCreating(modelBuilder);
         }
     }
