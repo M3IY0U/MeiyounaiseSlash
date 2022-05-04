@@ -32,7 +32,13 @@ namespace MeiyounaiseSlash.Commands.Last
             await HandleNowPlayingInteraction(ctx, user);
         }
 
-        private async Task HandleNowPlayingInteraction(InteractionContext ctx, DiscordUser user = null)
+        [ContextMenu(ApplicationCommandType.UserContextMenu, "Currently Playing")]
+        public async Task NowPlayingContext(ContextMenuContext ctx)
+        {
+            await HandleNowPlayingInteraction(ctx, ctx.TargetMember);
+        }
+
+        private async Task HandleNowPlayingInteraction(BaseContext ctx, DiscordUser user = null)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
