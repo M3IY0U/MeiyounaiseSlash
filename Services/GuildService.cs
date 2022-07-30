@@ -81,7 +81,7 @@ namespace MeiyounaiseSlash.Services
                     await e.Channel.SendMessageAsync(e.Message.Attachments?[0].Url);
                 else
                     await e.Channel.SendMessageAsync(e.Message.Content);
-                
+
                 RepeatMessages[e.Channel.Id] = (null, 1);
             }
         }

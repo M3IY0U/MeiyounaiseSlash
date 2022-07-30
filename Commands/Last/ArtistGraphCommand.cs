@@ -12,7 +12,6 @@ using MeiyounaiseSlash.Services.Charts;
 namespace MeiyounaiseSlash.Commands.Last
 {
     public class ArtistGraphCommand : LogCommand
-
     {
         public UserRepository UserRepository { get; set; }
         public LastfmClient LastClient { get; set; }
